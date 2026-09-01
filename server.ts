@@ -1118,8 +1118,12 @@ export async function startServer() {
   });
 }
 
-// Only auto-start standalone listener if not running inside Vercel Serverless Functions
-if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') {
+// Only auto-start standalone listener if executed as the main entrypoint
+const isMainScript = !process.env.VERCEL && 
+  process.env.NODE_ENV !== 'test' && 
+  Boolean(process.argv[1] && (process.argv[1].endsWith('server.cjs') || process.argv[1].endsWith('server.ts') || process.argv[1].endsWith('server.js')));
+
+if (isMainScript) {
   startServer().catch(err => {
     console.error('Failed to start server:', err);
   });
