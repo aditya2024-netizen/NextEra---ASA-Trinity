@@ -74,7 +74,7 @@ export async function initDatabase(): Promise<Pool | null> {
     }
   }
 
-  if (!pool) {
+  if (!pool && !process.env.VERCEL) {
     // Check if an external PostgreSQL instance is already running on localhost:5432
     try {
       const testPool = new Pool({
