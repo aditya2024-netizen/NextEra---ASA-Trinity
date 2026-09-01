@@ -1,0 +1,6 @@
+{
+  "name": "CareTrack AI",
+  "description": "Explainable Patient Follow-up Risk Intelligence Platform for predicting follow-up non-attendance, explaining drivers, and prioritizing proactive clinical interventions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
