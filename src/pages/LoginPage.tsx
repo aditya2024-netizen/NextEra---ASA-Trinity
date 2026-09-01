@@ -146,8 +146,49 @@ export const LoginPage: React.FC = () => {
             </button>
           </form>
 
+          {/* Quick Demo Logins */}
+          <div className="pt-2 border-t border-slate-100">
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center mb-2">
+              Instant Demo Access (1-Click)
+            </p>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <button
+                type="button"
+                onClick={() => { setEmail('doctor@caretrack.in'); setPassword('password123'); }}
+                className="p-2 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-800 font-bold text-left transition-colors cursor-pointer"
+              >
+                👨‍⚕️ Doctor Login
+                <span className="block text-[10px] font-normal text-blue-600">Dr. Rajesh Kulkarni</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => { setEmail('admin@caretrack.in'); setPassword('password123'); }}
+                className="p-2 rounded-lg bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-800 font-bold text-left transition-colors cursor-pointer"
+              >
+                🏥 Admin Login
+                <span className="block text-[10px] font-normal text-purple-600">Dr. Aruna Swaminathan</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => { setEmail('coordinator@caretrack.in'); setPassword('password123'); }}
+                className="p-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 font-bold text-left transition-colors cursor-pointer"
+              >
+                📞 Coordinator
+                <span className="block text-[10px] font-normal text-emerald-600">Amit Verma</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => { setEmail('nurse@caretrack.in'); setPassword('password123'); }}
+                className="p-2 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 font-bold text-left transition-colors cursor-pointer"
+              >
+                👩‍⚕️ Nurse Triage
+                <span className="block text-[10px] font-normal text-amber-600">Sister Meena Pillai</span>
+              </button>
+            </div>
+          </div>
+
           {/* Admin Notice */}
-          <div className="pt-4 border-t border-slate-100 text-center">
+          <div className="pt-2 border-t border-slate-100 text-center">
             <p className="text-xs text-slate-500">
               Staff accounts and credentials are provisioned exclusively by Hospital Administrators.
             </p>

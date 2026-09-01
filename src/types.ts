@@ -213,12 +213,15 @@ export interface AnalyzerFindings {
   evidenceCoverage: string;
   nextFollowUpDate: string;
   primaryDrivers: string[];
-  followUpBarriers: string[];
+  followUpBarriers?: string[];
+  clinicalHazards?: string[];
   recommendedActions: string[];
   suggestedIntervention: InterventionType;
   patientSummaryMessage: string;
   smsDraft: string;
   whatsappDraft: string;
+  confidence?: number;
+  topFactors?: RiskFactorContribution[];
   timestamp: string;
 }
 

@@ -18,44 +18,84 @@ import { generateSyntheticDataset, SEED_USERS } from '../data/seedData';
 let pool: Pool | null = null;
 let embeddedInstance: any = null;
 
-export async function getPool(): Promise<Pool> {
+// In-Memory Fallback Store for Serverless environments where PostgreSQL is not available
+const memPatients = new Map<string, Patient>();
+const memAppointments: Appointment[] = [];
+const memInterventions = new Map<string, Intervention>();
+const memNotifications: NotificationRecord[] = [];
+const memUsers = new Map<string, StaffUser & { passwordHash: string }>();
+const memAuditLogs: AuditLog[] = [];
+let memScoringConfig: ScoringConfiguration = { ...DEFAULT_SCORING_CONFIG };
+
+export function initInMemoryStore(): void {
+  if (memPatients.size > 0) return;
+  const dataset = generateSyntheticDataset(1000);
+  for (const p of dataset.patients) memPatients.set(p.id, p);
+  for (const a of dataset.appointments) memAppointments.push(a);
+  for (const i of dataset.interventions) memInterventions.set(i.id, i);
+  for (const u of SEED_USERS) {
+    memUsers.set(u.email.toLowerCase(), {
+      ...u,
+      passwordHash: '$2b$10$hashed_password_placeholder_for_demo_security_caretrack',
+    });
+  }
+  for (const log of dataset.auditLogs) memAuditLogs.push(log);
+}
+
+export async function getPool(): Promise<Pool | null> {
   if (pool) return pool;
   await initDatabase();
-  if (!pool) throw new Error('Database pool could not be initialized');
   return pool;
 }
 
-export async function initDatabase(): Promise<Pool> {
+export async function ensureDbInitialized(): Promise<void> {
+  await initDatabase();
+}
+
+export async function initDatabase(): Promise<Pool | null> {
   if (pool) return pool;
 
   const dbUrl = process.env.DATABASE_URL;
 
   if (dbUrl) {
-    console.log('[PostgreSQL] Connecting via DATABASE_URL...');
-    pool = new Pool({ connectionString: dbUrl });
-  } else {
-    // Check if an external PostgreSQL instance is already running on localhost:5432
-    const testPool = new Pool({
-      host: process.env.PGHOST || 'localhost',
-      port: Number(process.env.PGPORT) || 5432,
-      user: process.env.PGUSER || 'postgres',
-      password: process.env.PGPASSWORD || 'postgres',
-      database: process.env.PGDATABASE || 'caretrack',
-      connectionTimeoutMillis: 1500,
-    });
-
-    let connectedToExternal = false;
     try {
+      console.log('[PostgreSQL] Connecting via DATABASE_URL...');
+      const testPool = new Pool({
+        connectionString: dbUrl,
+        ssl: dbUrl.includes('localhost') ? false : { rejectUnauthorized: false },
+        connectionTimeoutMillis: 5000,
+      });
       const client = await testPool.connect();
       client.release();
       pool = testPool;
-      connectedToExternal = true;
+      console.log('[PostgreSQL] Connected successfully via DATABASE_URL');
+    } catch (err) {
+      console.warn('[PostgreSQL] Failed to connect via DATABASE_URL, falling back:', err);
+    }
+  }
+
+  if (!pool) {
+    // Check if an external PostgreSQL instance is already running on localhost:5432
+    try {
+      const testPool = new Pool({
+        host: process.env.PGHOST || 'localhost',
+        port: Number(process.env.PGPORT) || 5432,
+        user: process.env.PGUSER || 'postgres',
+        password: process.env.PGPASSWORD || 'postgres',
+        database: process.env.PGDATABASE || 'caretrack',
+        connectionTimeoutMillis: 1500,
+      });
+      const client = await testPool.connect();
+      client.release();
+      pool = testPool;
       console.log('[PostgreSQL] Connected to active PostgreSQL on port 5432');
     } catch {
-      await testPool.end().catch(() => {});
+      // Not on 5432
     }
+  }
 
-    if (!connectedToExternal) {
+  if (!pool && !process.env.VERCEL) {
+    try {
       console.log('[PostgreSQL] Starting persistent Embedded PostgreSQL server on port 5433...');
       const pgDataDir = path.resolve(process.cwd(), '.pgdata');
       if (!fs.existsSync(pgDataDir)) {
@@ -73,7 +113,7 @@ export async function initDatabase(): Promise<Pool> {
 
       try {
         await embeddedInstance.initialise();
-      } catch (e: any) {
+      } catch {
         // May already be initialized
       }
 
@@ -87,6 +127,8 @@ export async function initDatabase(): Promise<Pool> {
         password: 'password123',
         database: 'postgres',
       });
+    } catch (err) {
+      console.warn('[PostgreSQL] Embedded PostgreSQL could not start, will use fallback store:', err);
     }
   }
 
@@ -97,11 +139,15 @@ export async function initDatabase(): Promise<Pool> {
     process.exit(0);
   });
 
-  // Create Schemas & Tables
-  await createTables();
-
-  // Seed if empty
-  await seedDatabaseIfEmpty();
+  if (pool) {
+    // Create Schemas & Tables
+    await createTables();
+    // Seed if empty
+    await seedDatabaseIfEmpty();
+  } else {
+    console.log('[Database] Initialized in-memory fallback store (1,000 patients, seed accounts active)');
+    initInMemoryStore();
+  }
 
   return pool;
 }
@@ -432,6 +478,58 @@ export async function dbGetPatients(params: {
   limit?: number;
 }): Promise<{ data: Patient[]; total: number; page: number; limit: number; totalPages: number }> {
   const p = await getPool();
+  if (!p) {
+    initInMemoryStore();
+    let list = Array.from(memPatients.values());
+    if (params.search && params.search.trim()) {
+      const q = params.search.trim().toLowerCase();
+      list = list.filter(pt => 
+        pt.name.toLowerCase().includes(q) || 
+        pt.patientCode.toLowerCase().includes(q) || 
+        pt.condition.toLowerCase().includes(q) || 
+        pt.phone.includes(q)
+      );
+    }
+    if (params.riskLevel && params.riskLevel !== 'ALL') {
+      list = list.filter(pt => pt.currentRisk?.riskLevel === params.riskLevel);
+    }
+    if (params.interventionStatus && params.interventionStatus !== 'ALL') {
+      if (params.interventionStatus === 'PENDING') {
+        list = list.filter(pt => !pt.latestIntervention || pt.latestIntervention.status === 'Pending');
+      } else if (params.interventionStatus === 'COMPLETED') {
+        list = list.filter(pt => pt.latestIntervention && (pt.latestIntervention.status === 'Completed' || pt.latestIntervention.status === 'Confirmed'));
+      }
+    }
+    if (params.dueFilter && params.dueFilter !== 'ALL') {
+      const today = new Date().toISOString().split('T')[0];
+      if (params.dueFilter === 'TODAY') {
+        list = list.filter(pt => pt.nextFollowUpDate === today);
+      } else if (params.dueFilter === 'WEEK' || params.dueFilter === 'NEXT_7_DAYS') {
+        const nextWeek = new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0];
+        list = list.filter(pt => pt.nextFollowUpDate >= today && pt.nextFollowUpDate <= nextWeek);
+      } else if (params.dueFilter === 'NEXT_30_DAYS') {
+        const nextMonth = new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0];
+        list = list.filter(pt => pt.nextFollowUpDate >= today && pt.nextFollowUpDate <= nextMonth);
+      } else if (params.dueFilter === 'OVERDUE') {
+        list = list.filter(pt => pt.nextFollowUpDate < today);
+      }
+    }
+    const order = params.sortOrder === 'asc' ? 1 : -1;
+    list.sort((a, b) => {
+      if (params.sortBy === 'missedAppointments') return (a.missedAppointments - b.missedAppointments) * order;
+      if (params.sortBy === 'distanceKm') return (a.distanceKm - b.distanceKm) * order;
+      if (params.sortBy === 'attendanceRate') return (a.attendanceRate - b.attendanceRate) * order;
+      if (params.sortBy === 'nextFollowUpDate') return a.nextFollowUpDate.localeCompare(b.nextFollowUpDate) * order;
+      return ((a.currentRisk?.score || 0) - (b.currentRisk?.score || 0)) * order;
+    });
+    const total = list.length;
+    const pageNum = Math.max(1, params.page || 1);
+    const limitNum = Math.max(1, params.limit || 20);
+    const offset = (pageNum - 1) * limitNum;
+    const data = list.slice(offset, offset + limitNum);
+    return { data, total, page: pageNum, limit: limitNum, totalPages: Math.ceil(total / limitNum) || 1 };
+  }
+
   const conditions: string[] = [];
   const values: any[] = [];
   let paramIdx = 1;
@@ -515,6 +613,16 @@ export async function dbGetPatients(params: {
 
 export async function dbGetPatientById(idOrCode: string): Promise<Patient | null> {
   const p = await getPool();
+  if (!p) {
+    initInMemoryStore();
+    const query = idOrCode.toLowerCase();
+    for (const pt of memPatients.values()) {
+      if (pt.id.toLowerCase() === query || pt.patientCode.toLowerCase() === query) {
+        return pt;
+      }
+    }
+    return null;
+  }
   const res = await p.query(
     'SELECT * FROM patients WHERE id = $1 OR LOWER(patient_code) = LOWER($1)',
     [idOrCode]
@@ -525,6 +633,14 @@ export async function dbGetPatientById(idOrCode: string): Promise<Patient | null
 
 export async function dbCreatePatient(patient: Patient): Promise<Patient> {
   const p = await getPool();
+  if (!p) {
+    initInMemoryStore();
+    memPatients.set(patient.id, patient);
+    if (patient.currentRisk) {
+      await dbSavePrediction(patient.currentRisk);
+    }
+    return patient;
+  }
   await p.query(
     `INSERT INTO patients (
       id, patient_code, name, age, gender, phone, email, address, latitude, longitude,
@@ -564,6 +680,12 @@ export async function dbUpdatePatient(id: string, updates: Partial<Patient>): Pr
 
   const merged = { ...existing, ...updates, updatedAt: new Date().toISOString() };
 
+  if (!p) {
+    initInMemoryStore();
+    memPatients.set(existing.id, merged);
+    return merged;
+  }
+
   await p.query(
     `UPDATE patients SET
       name = $2, age = $3, gender = $4, phone = $5, email = $6, address = $7,
@@ -592,6 +714,10 @@ export async function dbUpdatePatient(id: string, updates: Partial<Patient>): Pr
 
 export async function dbGetAppointments(patientId: string): Promise<Appointment[]> {
   const p = await getPool();
+  if (!p) {
+    initInMemoryStore();
+    return memAppointments.filter(a => a.patientId === patientId);
+  }
   const res = await p.query(
     'SELECT * FROM appointments WHERE patient_id = $1 ORDER BY appointment_date DESC',
     [patientId]
@@ -609,6 +735,14 @@ export async function dbGetAppointments(patientId: string): Promise<Appointment[
 
 export async function dbGetInterventions(status?: string, limit: number = 50): Promise<Intervention[]> {
   const p = await getPool();
+  if (!p) {
+    initInMemoryStore();
+    let list = Array.from(memInterventions.values());
+    if (status && status !== 'ALL') {
+      list = list.filter(i => i.status === status);
+    }
+    return list.slice(0, limit);
+  }
   let sql = 'SELECT * FROM interventions';
   const values: any[] = [];
   if (status && status !== 'ALL') {
@@ -639,6 +773,10 @@ export async function dbGetInterventions(status?: string, limit: number = 50): P
 
 export async function dbGetInterventionsByPatientId(patientId: string): Promise<Intervention[]> {
   const p = await getPool();
+  if (!p) {
+    initInMemoryStore();
+    return Array.from(memInterventions.values()).filter(i => i.patientId === patientId);
+  }
   const res = await p.query(
     'SELECT * FROM interventions WHERE patient_id = $1 ORDER BY created_at DESC',
     [patientId]
@@ -665,6 +803,13 @@ export async function dbGetInterventionsByPatientId(patientId: string): Promise<
 
 export async function dbCreateIntervention(interv: Intervention): Promise<Intervention> {
   const p = await getPool();
+  if (!p) {
+    initInMemoryStore();
+    memInterventions.set(interv.id, interv);
+    const pt = memPatients.get(interv.patientId);
+    if (pt) pt.latestIntervention = interv;
+    return interv;
+  }
   await p.query(
     `INSERT INTO interventions (
       id, patient_id, patient_code, patient_name, prediction_id, staff_id, staff_name,
@@ -694,6 +839,26 @@ export async function dbUpdateInterventionStatus(
   patientConfirmedNextVisit?: boolean
 ): Promise<Intervention | null> {
   const p = await getPool();
+  if (!p) {
+    initInMemoryStore();
+    const row = memInterventions.get(id);
+    if (!row) return null;
+    const isCompleted = status === 'Completed' || status === 'Confirmed';
+    const completedAt = isCompleted ? new Date().toISOString() : row.completedAt;
+    const confirmed = patientConfirmedNextVisit !== undefined ? patientConfirmedNextVisit : row.patientConfirmedNextVisit;
+    const updatedNotes = notes ? `${row.notes}\n[Update]: ${notes}` : row.notes;
+    const updated: Intervention = {
+      ...row,
+      status: status as any,
+      notes: updatedNotes,
+      patientConfirmedNextVisit: confirmed,
+      completedAt,
+    };
+    memInterventions.set(id, updated);
+    const pt = memPatients.get(row.patientId);
+    if (pt) pt.latestIntervention = updated;
+    return updated;
+  }
   const res = await p.query('SELECT * FROM interventions WHERE id = $1', [id]);
   if (res.rows.length === 0) return null;
 
@@ -740,6 +905,11 @@ export async function dbUpdateInterventionStatus(
 
 export async function dbCreateNotification(record: NotificationRecord): Promise<NotificationRecord> {
   const p = await getPool();
+  if (!p) {
+    initInMemoryStore();
+    memNotifications.push(record);
+    return record;
+  }
   await p.query(
     `INSERT INTO notifications (id, patient_id, channel, destination, message_content, status, provider, is_demo, created_at)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
@@ -753,6 +923,12 @@ export async function dbCreateNotification(record: NotificationRecord): Promise<
 
 export async function dbSavePrediction(pred: RiskPrediction): Promise<RiskPrediction> {
   const p = await getPool();
+  if (!p) {
+    initInMemoryStore();
+    const pt = memPatients.get(pred.patientId);
+    if (pt) pt.currentRisk = pred;
+    return pred;
+  }
   await p.query(
     `INSERT INTO predictions (
       id, patient_id, score, risk_level, evidence_coverage, prediction_date, model_version,
@@ -776,6 +952,14 @@ export async function dbSavePrediction(pred: RiskPrediction): Promise<RiskPredic
 
 export async function dbGetPredictions(limit: number = 100): Promise<RiskPrediction[]> {
   const p = await getPool();
+  if (!p) {
+    initInMemoryStore();
+    const list: RiskPrediction[] = [];
+    for (const pt of memPatients.values()) {
+      if (pt.currentRisk) list.push(pt.currentRisk);
+    }
+    return list.slice(0, limit);
+  }
   const res = await p.query('SELECT * FROM predictions ORDER BY prediction_date DESC LIMIT $1', [limit]);
   return res.rows.map(r => ({
     id: r.id,
@@ -800,6 +984,18 @@ export async function dbGetPredictions(limit: number = 100): Promise<RiskPredict
 
 export async function dbGetUsers(): Promise<StaffUser[]> {
   const p = await getPool();
+  if (!p) {
+    initInMemoryStore();
+    return Array.from(memUsers.values()).map(u => ({
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      role: u.role,
+      department: u.department,
+      employeeId: u.employeeId,
+      phone: u.phone,
+    }));
+  }
   const res = await p.query('SELECT id, name, email, role, department, employee_id, phone FROM users ORDER BY name ASC');
   return res.rows.map(r => ({
     id: r.id,
@@ -814,6 +1010,10 @@ export async function dbGetUsers(): Promise<StaffUser[]> {
 
 export async function dbGetUserByEmail(email: string): Promise<(StaffUser & { passwordHash: string }) | null> {
   const p = await getPool();
+  if (!p) {
+    initInMemoryStore();
+    return memUsers.get(email.trim().toLowerCase()) || null;
+  }
   const res = await p.query('SELECT * FROM users WHERE LOWER(email) = LOWER($1)', [email.trim()]);
   if (res.rows.length === 0) return null;
   const r = res.rows[0];
@@ -831,6 +1031,11 @@ export async function dbGetUserByEmail(email: string): Promise<(StaffUser & { pa
 
 export async function dbCreateUser(user: StaffUser, passwordHash: string): Promise<StaffUser> {
   const p = await getPool();
+  if (!p) {
+    initInMemoryStore();
+    memUsers.set(user.email.toLowerCase(), { ...user, passwordHash });
+    return user;
+  }
   await p.query(
     `INSERT INTO users (id, name, email, role, department, employee_id, phone, password_hash)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
@@ -841,6 +1046,10 @@ export async function dbCreateUser(user: StaffUser, passwordHash: string): Promi
 
 export async function dbDeleteUser(email: string): Promise<boolean> {
   const p = await getPool();
+  if (!p) {
+    initInMemoryStore();
+    return memUsers.delete(email.trim().toLowerCase());
+  }
   const res = await p.query('DELETE FROM users WHERE LOWER(email) = LOWER($1)', [email.trim()]);
   return (res.rowCount ?? 0) > 0;
 }
@@ -857,11 +1066,16 @@ export async function dbLogAudit(
     id: `AUD-${Date.now().toString().slice(-6)}`,
     timestamp: new Date().toISOString(),
     staffName,
-    staffRole,
+    staffRole: staffRole as any,
     action,
     details,
     patientCode,
   };
+  if (!p) {
+    initInMemoryStore();
+    memAuditLogs.unshift(log);
+    return log;
+  }
   await p.query(
     `INSERT INTO audit_logs (id, timestamp, staff_name, staff_role, action, details, patient_code)
      VALUES ($1, $2, $3, $4, $5, $6, $7)`,
@@ -872,6 +1086,10 @@ export async function dbLogAudit(
 
 export async function dbGetAuditLogs(limit: number = 200): Promise<AuditLog[]> {
   const p = await getPool();
+  if (!p) {
+    initInMemoryStore();
+    return memAuditLogs.slice(0, limit);
+  }
   const res = await p.query('SELECT * FROM audit_logs ORDER BY timestamp DESC LIMIT $1', [limit]);
   return res.rows.map(r => ({
     id: r.id,
@@ -886,6 +1104,10 @@ export async function dbGetAuditLogs(limit: number = 200): Promise<AuditLog[]> {
 
 export async function dbGetScoringConfig(): Promise<ScoringConfiguration> {
   const p = await getPool();
+  if (!p) {
+    initInMemoryStore();
+    return memScoringConfig;
+  }
   const res = await p.query("SELECT config_json FROM scoring_configs WHERE id = 'DEFAULT'");
   if (res.rows.length === 0) return { ...DEFAULT_SCORING_CONFIG };
   const val = res.rows[0].config_json;
@@ -894,6 +1116,14 @@ export async function dbGetScoringConfig(): Promise<ScoringConfiguration> {
 
 export async function dbSaveScoringConfig(config: ScoringConfiguration): Promise<ScoringConfiguration> {
   const p = await getPool();
+  if (!p) {
+    initInMemoryStore();
+    memScoringConfig = config;
+    for (const pt of memPatients.values()) {
+      pt.currentRisk = calculatePatientRisk(pt, config);
+    }
+    return config;
+  }
   await p.query(
     `INSERT INTO scoring_configs (id, config_json, updated_at)
      VALUES ('DEFAULT', $1, NOW())
@@ -918,6 +1148,42 @@ export async function dbSaveScoringConfig(config: ScoringConfiguration): Promise
 
 export async function dbGetDashboardSummary(): Promise<DashboardSummary> {
   const p = await getPool();
+  if (!p) {
+    initInMemoryStore();
+    const patients = Array.from(memPatients.values());
+    const totalPatients = patients.length;
+    let high = 0, med = 0, low = 0;
+    let totalScore = 0, totalAttRate = 0;
+    const todayStr = new Date().toISOString().split('T')[0];
+    const weekStr = new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0];
+    let dueToday = 0, dueThisWeek = 0;
+    for (const pt of patients) {
+      const score = pt.currentRisk?.score || 0;
+      totalScore += score;
+      totalAttRate += pt.attendanceRate || 0;
+      if (score >= 60) high++;
+      else if (score >= 30) med++;
+      else low++;
+      if (pt.nextFollowUpDate === todayStr) dueToday++;
+      if (pt.nextFollowUpDate >= todayStr && pt.nextFollowUpDate <= weekStr) dueThisWeek++;
+    }
+    const interventions = Array.from(memInterventions.values());
+    const completed = interventions.filter(i => i.status === 'Completed' || i.status === 'Confirmed').length;
+    const pending = interventions.filter(i => i.status === 'Pending').length;
+    return {
+      totalPatients,
+      highRiskPatients: high,
+      mediumRiskPatients: med,
+      lowRiskPatients: low,
+      followUpsDueToday: dueToday,
+      followUpsDueThisWeek: dueThisWeek,
+      interventionsCompleted: completed,
+      interventionsPending: pending,
+      outreachSuccessRate: 84,
+      averageRiskScore: totalPatients > 0 ? Math.round(totalScore / totalPatients) : 48,
+      averageAttendanceRate: totalPatients > 0 ? Math.round(totalAttRate / totalPatients) : 76,
+    };
+  }
 
   const totalPatientsRes = await p.query('SELECT COUNT(*) FROM patients');
   const totalPatients = parseInt(totalPatientsRes.rows[0].count, 10);
@@ -978,6 +1244,23 @@ export async function dbGetDashboardSummary(): Promise<DashboardSummary> {
 
 export async function dbGetRiskDistribution() {
   const p = await getPool();
+  if (!p) {
+    initInMemoryStore();
+    let critical = 0, high = 0, med = 0, low = 0;
+    for (const pt of memPatients.values()) {
+      const level = pt.currentRisk?.riskLevel;
+      if (level === 'CRITICAL') critical++;
+      else if (level === 'HIGH') high++;
+      else if (level === 'MEDIUM') med++;
+      else low++;
+    }
+    return [
+      { name: 'Critical Risk (80-100)', value: critical, color: '#991B1B' },
+      { name: 'High Risk (60-79)', value: high, color: '#EF4444' },
+      { name: 'Medium Risk (30-59)', value: med, color: '#F59E0B' },
+      { name: 'Low Risk (0-29)', value: low, color: '#10B981' },
+    ];
+  }
   const criticalRes = await p.query("SELECT COUNT(*) FROM patients WHERE (current_risk->>'riskLevel') = 'CRITICAL'");
   const highRes = await p.query("SELECT COUNT(*) FROM patients WHERE (current_risk->>'riskLevel') = 'HIGH'");
   const medRes = await p.query("SELECT COUNT(*) FROM patients WHERE (current_risk->>'riskLevel') = 'MEDIUM'");

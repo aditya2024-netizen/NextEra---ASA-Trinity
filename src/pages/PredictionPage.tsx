@@ -52,19 +52,7 @@ export const PredictionPage: React.FC = () => {
   const [findings, setFindings] = useState<AnalyzerFindings | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
-  // Fetch cohort patients to populate patient selector
-  useEffect(() => {
-    api.getPatients({ limit: 20 }).then(res => {
-      if (res.success && res.data.length > 0) {
-        setPatients(res.data);
-        // Select first patient
-        const p = res.data[0];
-        setSelectedPatientId(p.id);
-        loadPatientIntoForm(p);
-      }
-    });
-  }, []);
-
+  // Load patient data into inputs
   const loadPatientIntoForm = (p: Patient) => {
     setName(p.name);
     setPhone(p.phone || '+91 98101 22334');
@@ -80,18 +68,113 @@ export const PredictionPage: React.FC = () => {
     setTransportAccess(p.transportAccess || 'Personal');
   };
 
+  const executeAnalysis = async (payload: any, showToast = true) => {
+    setLoading(true);
+    try {
+      const res = await api.runAnalyzer(payload);
+      if (res.success && res.data) {
+        setFindings(res.data);
+        if (showToast) {
+          addToast('success', 'Analyzer Findings Generated', `Analysis completed for ${payload.name}. Risk Score: ${res.data.riskScore}/100 (${res.data.riskLevel}).`);
+        }
+      }
+    } catch (err: any) {
+      if (showToast) {
+        addToast('error', 'Analyzer Failed', err.message || 'Could not run analyzer.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch cohort patients to populate patient selector on mount
+  useEffect(() => {
+    api.getPatients({ limit: 20 }).then(res => {
+      if (res.success && res.data.length > 0) {
+        setPatients(res.data);
+        const p = res.data[0];
+        setSelectedPatientId(p.id);
+        loadPatientIntoForm(p);
+        executeAnalysis({
+          id: p.id,
+          patientCode: p.patientCode,
+          name: p.name,
+          phone: p.phone || '+91 98101 22334',
+          condition: p.condition,
+          assignedDoctor: p.assignedDoctor || 'Dr. Rajesh Kulkarni, MD, DM',
+          nextFollowUpDate: p.nextFollowUpDate,
+          age: p.age,
+          distanceKm: p.distanceKm,
+          treatmentDurationMonths: p.treatmentDurationMonths || 12,
+          missedAppointments: p.missedAppointments,
+          totalAppointments: p.totalAppointments,
+          attendedAppointments: Math.max(0, p.totalAppointments - p.missedAppointments),
+          appointmentFrequencyDays: p.appointmentFrequencyDays || 30,
+          transportAccess: p.transportAccess || 'Personal',
+        }, false);
+      }
+    });
+  }, []);
+
   const handlePatientSelectChange = (pId: string) => {
     setSelectedPatientId(pId);
     const found = patients.find(p => p.id === pId);
     if (found) {
       loadPatientIntoForm(found);
+      executeAnalysis({
+        id: found.id,
+        patientCode: found.patientCode,
+        name: found.name,
+        phone: found.phone || '+91 98101 22334',
+        condition: found.condition,
+        assignedDoctor: found.assignedDoctor || 'Dr. Rajesh Kulkarni, MD, DM',
+        nextFollowUpDate: found.nextFollowUpDate,
+        age: found.age,
+        distanceKm: found.distanceKm,
+        treatmentDurationMonths: found.treatmentDurationMonths || 12,
+        missedAppointments: found.missedAppointments,
+        totalAppointments: found.totalAppointments,
+        attendedAppointments: Math.max(0, found.totalAppointments - found.missedAppointments),
+        appointmentFrequencyDays: found.appointmentFrequencyDays || 30,
+        transportAccess: found.transportAccess || 'Personal',
+      }, false);
     }
   };
 
-  const handleRunAnalyzer = async () => {
-    setLoading(true);
-    try {
-      const patientPayload: any = {
+  const handleRunAnalyzer = () => {
+    const currentTotal = Math.max(totalAppointments, missedAppointments);
+    const currentAttended = Math.max(0, currentTotal - missedAppointments);
+    const currentPayload: any = {
+      id: selectedPatientId || 'PAT-CUSTOM',
+      patientCode: selectedPatientId ? (patients.find(p => p.id === selectedPatientId)?.patientCode || 'P-1042') : 'P-CUSTOM',
+      name,
+      phone,
+      condition,
+      assignedDoctor,
+      nextFollowUpDate,
+      age: Number(age),
+      distanceKm: Number(distanceKm),
+      treatmentDurationMonths: Number(treatmentDurationMonths),
+      missedAppointments: Number(missedAppointments),
+      totalAppointments: currentTotal,
+      attendedAppointments: currentAttended,
+      appointmentFrequencyDays: Number(appointmentFrequencyDays),
+      transportAccess,
+    };
+    executeAnalysis(currentPayload, true);
+  };
+
+  // Debounced auto-recalculate when sliders change (400ms)
+  const isFirstRender = React.useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    const timer = setTimeout(() => {
+      const currentTotal = Math.max(totalAppointments, missedAppointments);
+      const currentAttended = Math.max(0, currentTotal - missedAppointments);
+      const currentPayload: any = {
         id: selectedPatientId || 'PAT-CUSTOM',
         patientCode: selectedPatientId ? (patients.find(p => p.id === selectedPatientId)?.patientCode || 'P-1042') : 'P-CUSTOM',
         name,
@@ -99,35 +182,20 @@ export const PredictionPage: React.FC = () => {
         condition,
         assignedDoctor,
         nextFollowUpDate,
-        age,
-        distanceKm,
-        treatmentDurationMonths,
-        missedAppointments,
-        totalAppointments,
-        attendedAppointments: Math.max(0, totalAppointments - missedAppointments),
-        appointmentFrequencyDays,
+        age: Number(age),
+        distanceKm: Number(distanceKm),
+        treatmentDurationMonths: Number(treatmentDurationMonths),
+        missedAppointments: Number(missedAppointments),
+        totalAppointments: currentTotal,
+        attendedAppointments: currentAttended,
+        appointmentFrequencyDays: Number(appointmentFrequencyDays),
         transportAccess,
       };
+      executeAnalysis(currentPayload, false);
+    }, 400);
 
-      const res = await api.runAnalyzer(patientPayload);
-      if (res.success && res.data) {
-        setFindings(res.data);
-        addToast('success', 'Analyzer Findings Generated', `Analysis completed for ${name}. Risk Score: ${res.data.riskScore}/100.`);
-      }
-    } catch (err: any) {
-      addToast('error', 'Analyzer Failed', err.message || 'Could not run analyzer.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Run on mount once
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      handleRunAnalyzer();
-    }, 500);
     return () => clearTimeout(timer);
-  }, []);
+  }, [missedAppointments, distanceKm, treatmentDurationMonths, appointmentFrequencyDays, age]);
 
   const handleContactPatient = () => {
     if (!findings) return;
@@ -397,146 +465,213 @@ export const PredictionPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Step 2 & 3: Analyzer Returns Findings & Contact Patient (7 cols) */}
-        <div className="lg:col-span-7 space-y-5">
-          {findings ? (
-            <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-6 space-y-5">
-              {/* Findings Header */}
-              <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-                <div className="flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center">
-                    2
-                  </span>
-                  <div>
-                    <h3 className="font-bold text-slate-900 text-sm">Analyzer Findings Delivered to Admin</h3>
-                    <p className="text-[11px] text-slate-500">
-                      Calculated for {findings.patientName} • Follow-up due: {findings.nextFollowUpDate}
-                    </p>
-                  </div>
-                </div>
-                <span className="px-2.5 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-bold uppercase tracking-wider">
-                  Analysis Complete
-                </span>
+        {/* RIGHT COLUMN: ANALYZER FINDINGS & ACTION PROMPTS */}
+        <div className="bg-white rounded-xl border border-slate-200 shadow-xs flex flex-col overflow-hidden">
+          <div className="px-5 py-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="w-5 h-5 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center">
+                2
+              </span>
+              <h3 className="font-bold text-slate-900 text-sm">Step 2: Real-Time Risk Findings & Outreach Strategy</h3>
+            </div>
+            {findings && (
+              <span className="text-xs font-mono font-bold text-slate-500">
+                Code: {findings.patientCode}
+              </span>
+            )}
+          </div>
+
+          <div className="p-5 flex-1 space-y-5">
+            {loading && !findings ? (
+              <div className="h-full flex flex-col items-center justify-center py-20 text-center text-slate-400">
+                <RefreshCw className="w-8 h-8 animate-spin text-blue-600 mb-3" />
+                <p className="font-bold text-slate-700">Evaluating Patient Follow-up Determinants...</p>
+                <p className="text-xs text-slate-500 mt-1">Executing weighted risk formula across clinic distance, missed visits & clinical history</p>
               </div>
-
-              {/* Score & Risk Tier Display */}
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className={`w-14 h-14 rounded-xl flex flex-col items-center justify-center font-bold text-white shadow-xs ${
-                    findings.riskLevel === 'HIGH' ? 'bg-red-600' : findings.riskLevel === 'MEDIUM' ? 'bg-amber-500' : 'bg-emerald-600'
-                  }`}>
-                    <span className="text-2xl leading-none">{findings.riskScore}</span>
-                    <span className="text-[9px] uppercase tracking-wider">/ 100</span>
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${
-                        findings.riskLevel === 'HIGH' ? 'bg-red-50 text-red-700 border-red-200' : findings.riskLevel === 'MEDIUM' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                      }`}>
-                        {findings.riskLevel} FOLLOW-UP RISK
-                      </span>
-                      <span className="text-xs font-semibold text-slate-500">
-                        Certainty: {findings.confidence}%
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-600 mt-1 font-medium">
-                      Primary Barrier: {distanceKm > 30 ? `Transit Distance (${distanceKm} km)` : 'Historical Missed Visits'}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="text-right">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Recommended Outreach</span>
-                  <span className="px-2.5 py-1 bg-blue-50 border border-blue-200 text-blue-800 font-bold rounded-lg text-xs inline-block">
-                    {findings.suggestedIntervention}
-                  </span>
-                </div>
-              </div>
-
-              {/* Primary Risk Drivers */}
-              <div className="space-y-2">
-                <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                  <Zap className="w-3.5 h-3.5 text-blue-600" />
-                  Primary Risk Drivers Identified by Analyzer
-                </h4>
-                <div className="space-y-1.5 text-xs">
-                  {findings.primaryDrivers && findings.primaryDrivers.map((driver, idx) => (
-                    <div key={idx} className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg flex items-start gap-2 text-slate-800">
-                      <span className="w-4 h-4 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
-                        {idx + 1}
-                      </span>
-                      <span>{driver}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Clinical Hazards Warning */}
-              <div className="space-y-2">
-                <h4 className="font-bold text-red-900 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                  <AlertTriangle className="w-3.5 h-3.5 text-red-600" />
-                  Potential Hazards if Follow-up is Missed
-                </h4>
-                <div className="space-y-1.5 text-xs">
-                  {findings.clinicalHazards && findings.clinicalHazards.map((hazard, idx) => (
-                    <div key={idx} className="p-2.5 bg-red-50/70 border border-red-200 rounded-lg flex items-start gap-2 text-red-900">
-                      <span className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 shrink-0" />
-                      <span>{hazard}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Step 3: Admin Action Banner -> Contact Patient */}
-              <div className="p-4 bg-slate-900 text-white rounded-xl space-y-3">
-                <div className="flex items-center justify-between">
+            ) : findings ? (
+              <>
+                {/* Findings Header */}
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                   <div className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-emerald-500 text-slate-900 text-[10px] font-bold flex items-center justify-center">
-                      3
-                    </span>
-                    <span className="font-bold text-xs uppercase tracking-wider text-emerald-400">
-                      Step 3: Admin Outreach to Patient
-                    </span>
+                    <BrainCircuit className="w-5 h-5 text-blue-600" />
+                    <div>
+                      <h4 className="font-bold text-slate-900 text-sm">Clinical Determinant Evaluation</h4>
+                      <p className="text-[11px] text-slate-500">
+                        Calculated for {findings.patientName} • Follow-up due: {findings.nextFollowUpDate}
+                      </p>
+                    </div>
                   </div>
-                  <span className="text-xs font-mono font-bold text-slate-300">
-                    Phone: {findings.phone}
+                  <span className="px-2.5 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-bold uppercase tracking-wider">
+                    Analysis Complete
                   </span>
                 </div>
 
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  The Analyzer has formulated customized care details and messages for <strong>{findings.patientName}</strong>. Admin can now place a direct voice call or dispatch SMS/WhatsApp instructions.
-                </p>
+                {/* Score & Risk Tier Display */}
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-14 h-14 rounded-xl flex flex-col items-center justify-center font-bold text-white shadow-xs ${
+                      findings.riskLevel === 'CRITICAL' ? 'bg-rose-800' : findings.riskLevel === 'HIGH' ? 'bg-red-600' : findings.riskLevel === 'MEDIUM' ? 'bg-amber-500' : 'bg-emerald-600'
+                    }`}>
+                      <span className="text-2xl leading-none">{findings.riskScore}</span>
+                      <span className="text-[9px] uppercase tracking-wider">/ 100</span>
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${
+                          findings.riskLevel === 'CRITICAL' ? 'bg-rose-50 text-rose-800 border-rose-300' : findings.riskLevel === 'HIGH' ? 'bg-red-50 text-red-700 border-red-200' : findings.riskLevel === 'MEDIUM' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        }`}>
+                          {findings.riskLevel} FOLLOW-UP RISK
+                        </span>
+                        <span className="text-xs font-semibold text-slate-500">
+                          Certainty: {findings.confidence || 85}%
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-600 mt-1 font-medium">
+                        Primary Barrier: {distanceKm > 30 ? `Transit Distance (${distanceKm} km)` : missedAppointments >= 2 ? `${missedAppointments} Historical Missed Visits` : 'Clinical Cadence / Regimen'}
+                      </p>
+                    </div>
+                  </div>
 
-                <div className="pt-2 flex flex-col sm:flex-row gap-2">
-                  <button
-                    type="button"
-                    onClick={handleContactPatient}
-                    className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider rounded-lg flex items-center justify-center gap-2 transition-colors shadow-md"
-                  >
-                    <PhoneCall className="w-4 h-4" />
-                    <span>Contact Patient via Phone ({findings.phone})</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-
-                  <a
-                    href={`tel:${findings.phone}`}
-                    className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-lg flex items-center justify-center gap-1.5 border border-slate-700 transition-colors"
-                  >
-                    <Phone className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Click to Dial</span>
-                  </a>
+                  <div className="text-right">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Recommended Outreach</span>
+                    <span className="px-2.5 py-1 bg-blue-50 border border-blue-200 text-blue-800 font-bold rounded-lg text-xs inline-block">
+                      {findings.suggestedIntervention}
+                    </span>
+                  </div>
                 </div>
+
+                {/* Factor Contributions to Risk Score */}
+                {findings.topFactors && findings.topFactors.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                      Factor Contributions to Risk Score (Weighted Engine)
+                    </h4>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {findings.topFactors.map((factor, idx) => (
+                        <div key={idx} className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg">
+                          <div className="flex justify-between items-center text-[11px] mb-1">
+                            <span className="font-bold text-slate-800 truncate" title={factor.name}>{factor.name}</span>
+                            <span className="font-mono font-bold text-blue-700">{factor.points}/{factor.maxPoints} pts</span>
+                          </div>
+                          <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full rounded-full transition-all duration-300 ${
+                                factor.points >= factor.maxPoints * 0.75 ? 'bg-red-500' :
+                                factor.points >= factor.maxPoints * 0.4 ? 'bg-amber-500' : 'bg-emerald-500'
+                              }`}
+                              style={{ width: `${Math.min(100, Math.round((factor.points / (factor.maxPoints || 1)) * 100))}%` }}
+                            />
+                          </div>
+                          <p className="text-[10px] text-slate-500 mt-1 truncate">{factor.rawValue}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Primary Risk Drivers */}
+                <div className="space-y-2">
+                  <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                    <Zap className="w-3.5 h-3.5 text-blue-600" />
+                    Primary Risk Drivers Identified by Analyzer
+                  </h4>
+                  <div className="space-y-1.5 text-xs">
+                    {findings.primaryDrivers && findings.primaryDrivers.map((driver, idx) => (
+                      <div key={idx} className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg flex items-start gap-2 text-slate-800">
+                        <span className="w-4 h-4 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                          {idx + 1}
+                        </span>
+                        <span>{driver}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Clinical Hazards Warning */}
+                <div className="space-y-2">
+                  <h4 className="font-bold text-red-900 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5 text-red-600" />
+                    Potential Hazards if Follow-up is Missed
+                  </h4>
+                  <div className="space-y-1.5 text-xs">
+                    {findings.clinicalHazards && findings.clinicalHazards.map((hazard, idx) => (
+                      <div key={idx} className="p-2.5 bg-red-50/70 border border-red-200 rounded-lg flex items-start gap-2 text-red-900">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 shrink-0" />
+                        <span>{hazard}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Recommended Clinical Actions */}
+                {findings.recommendedActions && findings.recommendedActions.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="font-bold text-emerald-900 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      Recommended Clinical Actions
+                    </h4>
+                    <div className="space-y-1.5 text-xs">
+                      {findings.recommendedActions.map((action, idx) => (
+                        <div key={idx} className="p-2.5 bg-emerald-50/70 border border-emerald-200 rounded-lg flex items-start gap-2 text-emerald-900">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
+                          <span>{action}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {/* Step 3: Admin Action Banner -> Contact Patient */}
+                <div className="p-4 bg-slate-900 text-white rounded-xl space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="w-5 h-5 rounded-full bg-emerald-500 text-slate-900 text-[10px] font-bold flex items-center justify-center">
+                        3
+                      </span>
+                      <span className="font-bold text-xs uppercase tracking-wider text-emerald-400">
+                        Step 3: Admin Outreach to Patient
+                      </span>
+                    </div>
+                    <span className="text-xs font-mono font-bold text-slate-300">
+                      Phone: {findings.phone}
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    The Analyzer has formulated customized care details and messages for <strong>{findings.patientName}</strong>. Admin can now place a direct voice call or dispatch SMS/WhatsApp instructions.
+                  </p>
+
+                  <div className="pt-2 flex flex-col sm:flex-row gap-2">
+                    <button
+                      type="button"
+                      onClick={handleContactPatient}
+                      className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider rounded-lg flex items-center justify-center gap-2 transition-colors shadow-md"
+                    >
+                      <PhoneCall className="w-4 h-4" />
+                      <span>Contact Patient via Phone ({findings.phone})</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+
+                    <a
+                      href={`tel:${findings.phone}`}
+                      className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-lg flex items-center justify-center gap-1.5 border border-slate-700 transition-colors"
+                    >
+                      <Phone className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Click to Dial</span>
+                    </a>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-12 text-center space-y-3">
+                <BrainCircuit className="w-12 h-12 text-slate-300 mx-auto" />
+                <h4 className="text-base font-bold text-slate-700">Analyzer Ready for Data</h4>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                  Select a registered outpatient from the list or modify the clinical parameters on the left, then click "Submit Details to Risk Analyzer".
+                </p>
               </div>
-            </div>
-          ) : (
-            <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-12 text-center space-y-3">
-              <BrainCircuit className="w-12 h-12 text-slate-300 mx-auto" />
-              <h4 className="text-base font-bold text-slate-700">Analyzer Ready for Data</h4>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                Select a registered outpatient from the list or modify the clinical parameters on the left, then click "Submit Details to Analyzer".
-              </p>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>
