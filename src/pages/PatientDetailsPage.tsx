@@ -41,6 +41,7 @@ export const PatientDetailsPage: React.FC = () => {
     runAnalyzerForPatient,
     isAnalyzing,
     setIsAdminLoginModalOpen,
+    patientRefreshKey,
     addToast
   } = useApp();
   const { isAdmin } = useAuth();
@@ -71,7 +72,7 @@ export const PatientDetailsPage: React.FC = () => {
     if (selectedPatientId) {
       loadPatient(selectedPatientId);
     }
-  }, [selectedPatientId]);
+  }, [selectedPatientId, patientRefreshKey]);
 
   if (loading) {
     return (
@@ -151,6 +152,15 @@ export const PatientDetailsPage: React.FC = () => {
           >
             <PhoneCall className="w-4 h-4" />
             Contact Patient ({patient.phone})
+          </button>
+
+          <button
+            onClick={() => selectedPatientId && loadPatient(selectedPatientId)}
+            className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors"
+            title="Refresh Dossier Data"
+          >
+            <RefreshCw className="w-4 h-4 text-slate-500" />
+            <span className="hidden sm:inline">Refresh</span>
           </button>
 
           <button
@@ -242,7 +252,7 @@ export const PatientDetailsPage: React.FC = () => {
                 <p className="text-xs text-slate-500">Mathematical point contribution per clinical factor.</p>
               </div>
               <span className="text-xs font-mono text-slate-600 font-semibold">
-                Certainty: {Math.round(riskAnalysis.confidenceOrPriority * 100)}%
+                Certainty: {Math.round((riskAnalysis.confidence ?? 0.94) * 100)}%
               </span>
             </div>
 

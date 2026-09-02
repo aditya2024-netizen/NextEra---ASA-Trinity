@@ -55,12 +55,20 @@ export const SettingsPage: React.FC = () => {
   const [isRegistering, setIsRegistering] = useState<boolean>(false);
   const [regError, setRegError] = useState<string | null>(null);
 
+  const missedPoints = config.maxMissedPoints ?? config.weights?.missedAppointmentsWeight ?? 35;
+  const distancePoints = config.maxDistancePoints ?? config.weights?.distanceWeight ?? 20;
+  const attendancePoints = config.maxAttendancePoints ?? config.weights?.attendanceRateWeight ?? 20;
+  const durationPoints = config.maxDurationPoints ?? config.weights?.treatmentDurationWeight ?? 10;
+  const frequencyPoints = config.maxFrequencyPoints ?? config.weights?.appointmentFrequencyWeight ?? 10;
+  const agePoints = config.maxAgePoints ?? config.weights?.ageWeight ?? 5;
+
   const totalMax = 
-    config.maxMissedPoints + 
-    config.maxDistancePoints + 
-    config.maxAttendancePoints + 
-    config.maxDurationPoints + 
-    config.maxFrequencyPoints;
+    missedPoints + 
+    distancePoints + 
+    attendancePoints + 
+    durationPoints + 
+    frequencyPoints +
+    agePoints;
 
   useEffect(() => {
     if (activeTab === 'staff' && isAdmin) {
@@ -86,7 +94,24 @@ export const SettingsPage: React.FC = () => {
     e.preventDefault();
     setIsSaving(true);
     try {
-      await updateScoringConfig(config);
+      const synchronizedConfig: ScoringConfiguration = {
+        ...config,
+        maxMissedPoints: missedPoints,
+        maxDistancePoints: distancePoints,
+        maxAttendancePoints: attendancePoints,
+        maxDurationPoints: durationPoints,
+        maxFrequencyPoints: frequencyPoints,
+        maxAgePoints: agePoints,
+        weights: {
+          missedAppointmentsWeight: missedPoints,
+          distanceWeight: distancePoints,
+          attendanceRateWeight: attendancePoints,
+          treatmentDurationWeight: durationPoints,
+          appointmentFrequencyWeight: frequencyPoints,
+          ageWeight: agePoints,
+        }
+      };
+      await updateScoringConfig(synchronizedConfig);
     } finally {
       setIsSaving(false);
     }
@@ -289,32 +314,32 @@ export const SettingsPage: React.FC = () => {
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
                 <div className="flex justify-between font-semibold">
                   <label className="text-slate-700">Missed Visits Cap</label>
-                  <span className="font-mono text-slate-900 font-bold">{config.maxMissedPoints} pts</span>
+                  <span className="font-mono text-slate-900 font-bold">{missedPoints} pts</span>
                 </div>
                 <input
                   type="range"
                   min="20"
                   max="60"
                   step="5"
-                  value={config.maxMissedPoints}
+                  value={missedPoints}
                   onChange={e => setConfig({ ...config, maxMissedPoints: Number(e.target.value) })}
                   className="w-full h-2 bg-slate-200 rounded-lg appearance-none accent-blue-600 cursor-pointer"
                 />
-                <span className="text-[10px] text-slate-500 block">Default: 40 pts</span>
+                <span className="text-[10px] text-slate-500 block">Default: 35 pts</span>
               </div>
 
               {/* Distance Cap */}
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
                 <div className="flex justify-between font-semibold">
                   <label className="text-slate-700">Distance from Hospital Cap</label>
-                  <span className="font-mono text-slate-900 font-bold">{config.maxDistancePoints} pts</span>
+                  <span className="font-mono text-slate-900 font-bold">{distancePoints} pts</span>
                 </div>
                 <input
                   type="range"
                   min="10"
                   max="40"
                   step="5"
-                  value={config.maxDistancePoints}
+                  value={distancePoints}
                   onChange={e => setConfig({ ...config, maxDistancePoints: Number(e.target.value) })}
                   className="w-full h-2 bg-slate-200 rounded-lg appearance-none accent-blue-600 cursor-pointer"
                 />
@@ -325,32 +350,32 @@ export const SettingsPage: React.FC = () => {
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
                 <div className="flex justify-between font-semibold">
                   <label className="text-slate-700">Attendance History Cap</label>
-                  <span className="font-mono text-slate-900 font-bold">{config.maxAttendancePoints} pts</span>
+                  <span className="font-mono text-slate-900 font-bold">{attendancePoints} pts</span>
                 </div>
                 <input
                   type="range"
                   min="10"
                   max="40"
                   step="5"
-                  value={config.maxAttendancePoints}
+                  value={attendancePoints}
                   onChange={e => setConfig({ ...config, maxAttendancePoints: Number(e.target.value) })}
                   className="w-full h-2 bg-slate-200 rounded-lg appearance-none accent-blue-600 cursor-pointer"
                 />
-                <span className="text-[10px] text-slate-500 block">Default: 25 pts</span>
+                <span className="text-[10px] text-slate-500 block">Default: 20 pts</span>
               </div>
 
               {/* Treatment Duration Cap */}
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
                 <div className="flex justify-between font-semibold">
                   <label className="text-slate-700">Treatment Duration Cap</label>
-                  <span className="font-mono text-slate-900 font-bold">{config.maxDurationPoints} pts</span>
+                  <span className="font-mono text-slate-900 font-bold">{durationPoints} pts</span>
                 </div>
                 <input
                   type="range"
                   min="5"
                   max="20"
                   step="1"
-                  value={config.maxDurationPoints}
+                  value={durationPoints}
                   onChange={e => setConfig({ ...config, maxDurationPoints: Number(e.target.value) })}
                   className="w-full h-2 bg-slate-200 rounded-lg appearance-none accent-blue-600 cursor-pointer"
                 />
@@ -361,15 +386,33 @@ export const SettingsPage: React.FC = () => {
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
                 <div className="flex justify-between font-semibold">
                   <label className="text-slate-700">Appointment Cadence Cap</label>
-                  <span className="font-mono text-slate-900 font-bold">{config.maxFrequencyPoints} pts</span>
+                  <span className="font-mono text-slate-900 font-bold">{frequencyPoints} pts</span>
+                </div>
+                <input
+                  type="range"
+                  min="2"
+                  max="20"
+                  step="1"
+                  value={frequencyPoints}
+                  onChange={e => setConfig({ ...config, maxFrequencyPoints: Number(e.target.value) })}
+                  className="w-full h-2 bg-slate-200 rounded-lg appearance-none accent-blue-600 cursor-pointer"
+                />
+                <span className="text-[10px] text-slate-500 block">Default: 10 pts</span>
+              </div>
+
+              {/* Age Vulnerability Cap */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                <div className="flex justify-between font-semibold">
+                  <label className="text-slate-700">Age Vulnerability Cap</label>
+                  <span className="font-mono text-slate-900 font-bold">{agePoints} pts</span>
                 </div>
                 <input
                   type="range"
                   min="2"
                   max="15"
                   step="1"
-                  value={config.maxFrequencyPoints}
-                  onChange={e => setConfig({ ...config, maxFrequencyPoints: Number(e.target.value) })}
+                  value={agePoints}
+                  onChange={e => setConfig({ ...config, maxAgePoints: Number(e.target.value) })}
                   className="w-full h-2 bg-slate-200 rounded-lg appearance-none accent-blue-600 cursor-pointer"
                 />
                 <span className="text-[10px] text-slate-500 block">Default: 5 pts</span>

@@ -6,7 +6,7 @@ import { InterventionType, InterventionStatus } from '../types';
 import { X, CheckCircle, PhoneCall, AlertCircle, Calendar, MessageSquare, Send, Check } from 'lucide-react';
 
 export const InterventionModal: React.FC = () => {
-  const { interventionModalPatient, setInterventionModalPatient, addToast, refreshDashboard } = useApp();
+  const { interventionModalPatient, setInterventionModalPatient, addToast, refreshDashboard, triggerPatientRefresh } = useApp();
   const { user } = useAuth();
 
   const [type, setType] = useState<InterventionType>('Priority Phone Call');
@@ -37,6 +37,7 @@ export const InterventionModal: React.FC = () => {
       if (res.success) {
         addToast('success', 'Intervention Logged', `Recorded '${type}' for ${patient.name}. Status: ${status}`);
         await refreshDashboard();
+        triggerPatientRefresh();
         setInterventionModalPatient(null);
       }
     } catch (err: any) {
@@ -49,11 +50,11 @@ export const InterventionModal: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
       <div 
-        className="bg-white rounded-xl max-w-lg w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col"
+        className="bg-white rounded-xl max-w-lg w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-6 py-4 bg-[#0F172A] text-white flex items-center justify-between">
+        <div className="px-6 py-4 bg-[#0F172A] text-white flex items-center justify-between shrink-0">
           <div>
             <h3 className="text-base font-bold">Record Clinical Follow-up Intervention</h3>
             <p className="text-xs text-slate-300">
@@ -69,7 +70,7 @@ export const InterventionModal: React.FC = () => {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs">
           {/* Staff Info Banner */}
           <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between text-slate-600">
             <span>Logging Staff: <strong>{user?.name || 'Nurse Michael Chen, RN'}</strong></span>

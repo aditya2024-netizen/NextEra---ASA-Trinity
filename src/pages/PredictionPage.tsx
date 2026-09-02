@@ -466,7 +466,7 @@ export const PredictionPage: React.FC = () => {
         </div>
 
         {/* RIGHT COLUMN: ANALYZER FINDINGS & ACTION PROMPTS */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-xs flex flex-col overflow-hidden">
+        <div className="lg:col-span-7 bg-white rounded-xl border border-slate-200 shadow-xs flex flex-col overflow-hidden">
           <div className="px-5 py-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="w-5 h-5 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center">

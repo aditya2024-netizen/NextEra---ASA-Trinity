@@ -1115,27 +1115,40 @@ export async function dbGetScoringConfig(): Promise<ScoringConfiguration> {
 }
 
 export async function dbSaveScoringConfig(config: ScoringConfiguration): Promise<ScoringConfiguration> {
+  const mergedConfig: ScoringConfiguration = {
+    ...DEFAULT_SCORING_CONFIG,
+    ...config,
+    weights: {
+      ...DEFAULT_SCORING_CONFIG.weights,
+      ...(config.weights || {}),
+    },
+    thresholds: {
+      ...DEFAULT_SCORING_CONFIG.thresholds,
+      ...(config.thresholds || {}),
+    },
+  };
+
   const p = await getPool();
   if (!p) {
     initInMemoryStore();
-    memScoringConfig = config;
+    memScoringConfig = mergedConfig;
     for (const pt of memPatients.values()) {
-      pt.currentRisk = calculatePatientRisk(pt, config);
+      pt.currentRisk = calculatePatientRisk(pt, mergedConfig);
     }
-    return config;
+    return mergedConfig;
   }
   await p.query(
     `INSERT INTO scoring_configs (id, config_json, updated_at)
      VALUES ('DEFAULT', $1, NOW())
      ON CONFLICT (id) DO UPDATE SET config_json = EXCLUDED.config_json, updated_at = NOW()`,
-    [JSON.stringify(config)]
+    [JSON.stringify(mergedConfig)]
   );
 
   // Recalculate risk for all patients
   const patientsRes = await p.query('SELECT * FROM patients');
   for (const r of patientsRes.rows) {
     const patient = mapRowToPatient(r);
-    const newRisk = calculatePatientRisk(patient, config);
+    const newRisk = calculatePatientRisk(patient, mergedConfig);
     await p.query(
       `UPDATE patients SET current_risk = $2, updated_at = NOW() WHERE id = $1`,
       [patient.id, JSON.stringify(newRisk)]
@@ -1143,7 +1156,7 @@ export async function dbSaveScoringConfig(config: ScoringConfiguration): Promise
     await dbSavePrediction(newRisk);
   }
 
-  return config;
+  return mergedConfig;
 }
 
 export async function dbGetDashboardSummary(): Promise<DashboardSummary> {

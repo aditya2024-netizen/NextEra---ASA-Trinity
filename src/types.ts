@@ -74,6 +74,7 @@ export interface RiskPrediction {
   patientId: string;
   score: number; // 0 - 100
   riskLevel: RiskLevel;
+  confidence?: number; // 0 - 1
   evidenceCoverage: string; // e.g. "Reviewed 12 historical appointments across 12 months"
   predictionDate: string;
   modelVersion: string; // e.g. "CareTrack Explainable Rule Engine v2.5"

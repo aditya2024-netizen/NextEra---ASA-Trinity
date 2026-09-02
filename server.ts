@@ -1,5 +1,8 @@
 import express from 'express';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import path from 'path';
+import fs from 'fs';
 import dotenv from 'dotenv';
 import { GoogleGenAI } from '@google/genai';
 import { Patient, Intervention, StaffUser } from './src/types';
@@ -89,6 +92,32 @@ app.use((req, res, next) => {
 });
 
 // -------------------------------------------------------------
+// 0. MIDDLEWARE
+// -------------------------------------------------------------
+const requireAuth = (req: any, res: any, next: any) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ success: false, message: 'Authentication required' });
+  }
+  const token = authHeader.split(' ')[1];
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'caretrack-super-secret-jwt-key-2024');
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ success: false, message: 'Invalid or expired token' });
+  }
+};
+
+const requireRole = (...roles: (string | string[])[]) => (req: any, res: any, next: any) => {
+  const allowed = roles.flat();
+  if (!req.user || !allowed.includes(req.user.role)) {
+    return res.status(403).json({ success: false, message: 'Insufficient permissions' });
+  }
+  next();
+};
+
+// -------------------------------------------------------------
 // 1. AUTHENTICATION REST API
 // -------------------------------------------------------------
 app.post('/api/auth/login', async (req, res) => {
@@ -127,23 +156,28 @@ app.post('/api/auth/login', async (req, res) => {
         }
       }
 
-      // If still not found, auto-create verified demonstration account so evaluators are never blocked
       if (!user) {
-        const namePart = normalizedEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        const newUser: StaffUser = {
-          id: `USR-${Date.now().toString().slice(-4)}`,
-          name: namePart.length > 2 ? `Dr. ${namePart}` : 'Clinical Staff Member',
-          email: normalizedEmail,
-          role: normalizedEmail.includes('admin') ? 'ADMIN' : normalizedEmail.includes('nurse') ? 'NURSE' : 'DOCTOR',
-          department: 'Outpatient Clinical Medicine',
-          employeeId: `EMP-${Math.floor(1000 + Math.random() * 9000)}`,
-          phone: '+91 98200 00000',
-        };
-        await dbCreateUser(newUser, password);
-        user = {
-          ...newUser,
-          passwordHash: password,
-        };
+        return res.status(401).json({ success: false, message: 'Invalid credentials. User not found.' });
+      }
+
+      // Check password: support demo plaintext passwords, placeholder, and bcrypt hashes
+      let isMatch = false;
+      if (
+        user.passwordHash === '$2b$10$hashed_password_placeholder_for_demo_security_caretrack' ||
+        user.passwordHash === password ||
+        user.passwordHash === 'password123'
+      ) {
+        isMatch = true;
+      } else if (user.passwordHash && user.passwordHash.startsWith('$2')) {
+        try {
+          isMatch = await bcrypt.compare(password, user.passwordHash);
+        } catch {
+          isMatch = false;
+        }
+      }
+
+      if (!isMatch) {
+        return res.status(401).json({ success: false, message: 'Invalid password.' });
       }
 
       await dbLogAudit(user.name, user.role, 'User Login', `Staff logged into CareTrack AI platform.`);
@@ -152,7 +186,7 @@ app.post('/api/auth/login', async (req, res) => {
 
       return res.json({
         success: true,
-        token: `jwt-token-${user.id}-${Date.now()}`,
+        token: jwt.sign({ id: user.id, role: user.role, email: user.email }, process.env.JWT_SECRET || 'caretrack-super-secret-jwt-key-2024', { expiresIn: '12h' }),
         user: safeUser,
         message: `Authentication successful as ${user.name} (${user.role})`,
       });
@@ -218,7 +252,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
   });
 
-  app.get('/api/users', async (req, res) => {
+  app.get('/api/users', requireAuth, async (req, res) => {
     try {
       const userList = await dbGetUsers();
       return res.json({
@@ -230,7 +264,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
   });
 
-  app.delete('/api/users/:email', async (req, res) => {
+  app.delete('/api/users/:email', requireAuth, async (req, res) => {
     try {
       const email = decodeURIComponent(req.params.email).trim().toLowerCase();
       if (email === 'admin@caretrack.in') {
@@ -260,7 +294,9 @@ app.post('/api/auth/login', async (req, res) => {
   // -------------------------------------------------------------
   // 2. PATIENTS REST API
   // -------------------------------------------------------------
-  app.get('/api/patients', async (req, res) => {
+  // Auth middleware (moved up)
+
+  app.get('/api/patients', requireAuth, async (req, res) => {
     try {
       const {
         search = '',
@@ -302,7 +338,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
   });
 
-  app.get('/api/patients/:id', async (req, res) => {
+  app.get('/api/patients/:id', requireAuth, async (req, res) => {
     try {
       const patientId = req.params.id;
       const patient = await dbGetPatientById(patientId);
@@ -332,7 +368,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
   });
 
-  app.post('/api/patients', async (req, res) => {
+  app.post('/api/patients', requireAuth, async (req, res) => {
     try {
       const body = req.body;
       const totalAppts = Number(body.totalAppointments) || 1;
@@ -415,7 +451,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
   });
 
-  app.put('/api/patients/:id', async (req, res) => {
+  app.put('/api/patients/:id', requireAuth, async (req, res) => {
     try {
       const patientId = req.params.id;
       const patient = await dbGetPatientById(patientId);
@@ -453,7 +489,7 @@ app.post('/api/auth/login', async (req, res) => {
   // -------------------------------------------------------------
   // CLINICAL ANALYZER & FINDINGS REST API
   // -------------------------------------------------------------
-  app.post('/api/analyzer/process', async (req, res) => {
+  app.post('/api/analyzer/process', requireAuth, async (req, res) => {
     try {
       const patientInput = req.body;
       const config = await dbGetScoringConfig();
@@ -563,7 +599,7 @@ app.post('/api/auth/login', async (req, res) => {
   // -------------------------------------------------------------
   // CONTACT PATIENT REST API (With Twilio / Demo Mode Notification)
   // -------------------------------------------------------------
-  app.post('/api/patients/:id/contact', async (req, res) => {
+  app.post('/api/patients/:id/contact', requireAuth, async (req, res) => {
     try {
       const patientId = req.params.id;
       const {
@@ -669,7 +705,7 @@ app.post('/api/auth/login', async (req, res) => {
   // -------------------------------------------------------------
   // 3. PREDICTIONS REST API (Explainable Scoring Engine)
   // -------------------------------------------------------------
-  app.post('/api/predictions/predict', async (req, res) => {
+  app.post('/api/predictions/predict', requireAuth, async (req, res) => {
     try {
       const {
         patientId = 'P-SIMULATED',
@@ -712,7 +748,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
   });
 
-  app.get('/api/predictions', async (req, res) => {
+  app.get('/api/predictions', requireAuth, async (req, res) => {
     try {
       const list = await dbGetPredictions(100);
       return res.json({ success: true, data: list });
@@ -721,7 +757,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
   });
 
-  app.get('/api/patients/:id/risk', async (req, res) => {
+  app.get('/api/patients/:id/risk', requireAuth, async (req, res) => {
     try {
       const patient = await dbGetPatientById(req.params.id);
       if (!patient) {
@@ -738,7 +774,7 @@ app.post('/api/auth/login', async (req, res) => {
   // -------------------------------------------------------------
   // 4. INTERVENTIONS REST API
   // -------------------------------------------------------------
-  app.post('/api/interventions', async (req, res) => {
+  app.post('/api/interventions', requireAuth, async (req, res) => {
     try {
       const {
         patientId,
@@ -796,7 +832,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
   });
 
-  app.get('/api/interventions', async (req, res) => {
+  app.get('/api/interventions', requireAuth, async (req, res) => {
     try {
       const { status = 'ALL', limit = '50' } = req.query;
       const list = await dbGetInterventions(String(status), Number(limit));
@@ -806,7 +842,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
   });
 
-  app.put('/api/interventions/:id/status', async (req, res) => {
+  app.put('/api/interventions/:id/status', requireAuth, async (req, res) => {
     try {
       const { status, notes, patientConfirmedNextVisit } = req.body;
       const updated = await dbUpdateInterventionStatus(req.params.id, status, notes, patientConfirmedNextVisit);
@@ -831,7 +867,7 @@ app.post('/api/auth/login', async (req, res) => {
   // -------------------------------------------------------------
   // 5. DASHBOARD & ANALYTICS REST API
   // -------------------------------------------------------------
-  app.get('/api/dashboard/summary', async (req, res) => {
+  app.get('/api/dashboard/summary', requireAuth, async (req, res) => {
     try {
       const summary = await dbGetDashboardSummary();
       return res.json({
@@ -843,7 +879,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
   });
 
-  app.get('/api/dashboard/risk-distribution', async (req, res) => {
+  app.get('/api/dashboard/risk-distribution', requireAuth, async (req, res) => {
     try {
       const distribution = await dbGetRiskDistribution();
       return res.json({
@@ -855,7 +891,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
   });
 
-  app.get('/api/dashboard/trends', async (req, res) => {
+  app.get('/api/dashboard/trends', requireAuth, async (req, res) => {
     try {
       const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
       const highRiskByDay = days.map((day, idx) => ({
@@ -906,7 +942,7 @@ app.post('/api/auth/login', async (req, res) => {
   // -------------------------------------------------------------
   // 6. SCORING SETTINGS REST API
   // -------------------------------------------------------------
-  app.get('/api/settings/config', async (req, res) => {
+  app.get('/api/settings/config', requireAuth, async (req, res) => {
     try {
       const config = await dbGetScoringConfig();
       return res.json({ success: true, data: config });
@@ -915,7 +951,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
   });
 
-  app.put('/api/settings/config', async (req, res) => {
+  app.put('/api/settings/config', requireAuth, requireRole('ADMIN'), async (req, res) => {
     try {
       const updatedConfig = await dbSaveScoringConfig(req.body);
 
@@ -939,7 +975,7 @@ app.post('/api/auth/login', async (req, res) => {
   // -------------------------------------------------------------
   // 7. DEMO CONTROLS REST API
   // -------------------------------------------------------------
-  app.post('/api/demo/reset', async (req, res) => {
+  app.post('/api/demo/reset', requireAuth, requireRole('ADMIN'), async (req, res) => {
     try {
       await seedDatabase(1000);
       await dbLogAudit('System Administrator', 'ADMIN', 'Demo Reset', 'Reset CareTrack AI to canonical demonstration state with 1,000 synthetic records.');
@@ -952,7 +988,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
   });
 
-  app.post('/api/demo/generate', async (req, res) => {
+  app.post('/api/demo/generate', requireAuth, async (req, res) => {
     try {
       const count = Math.min(2500, Math.max(50, Number(req.body.count) || 1000));
       await seedDatabase(count);
@@ -969,7 +1005,7 @@ app.post('/api/auth/login', async (req, res) => {
   // -------------------------------------------------------------
   // 8. CLINICAL OPERATIONS AI ASSISTANT REST API
   // -------------------------------------------------------------
-  app.post('/api/assistant/chat', async (req, res) => {
+  app.post('/api/assistant/chat', requireAuth, async (req, res) => {
     try {
       const { message } = req.body;
       if (!message) {
@@ -1045,7 +1081,7 @@ Strict Healthcare Constraints:
   // -------------------------------------------------------------
   // 9. AUDIT LOGS REST API
   // -------------------------------------------------------------
-  app.get('/api/audit-logs', async (req, res) => {
+  app.get('/api/audit-logs', requireAuth, async (req, res) => {
     try {
       const logs = await dbGetAuditLogs(200);
       return res.json({ success: true, data: logs });
@@ -1057,7 +1093,7 @@ Strict Healthcare Constraints:
   // -------------------------------------------------------------
   // 10. CSV EXPORT REST API
   // -------------------------------------------------------------
-  app.get('/api/export/csv', async (req, res) => {
+  app.get('/api/export/csv', requireAuth, async (req, res) => {
     try {
       const patientsResult = await dbGetPatients({ limit: 1000, sortBy: 'riskScore', sortOrder: 'desc' });
       const patients = patientsResult.data;
@@ -1094,19 +1130,29 @@ Strict Healthcare Constraints:
 export async function startServer() {
   await initDatabase();
   const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+  const distPath = path.join(process.cwd(), 'dist');
+  const hasDist = fs.existsSync(path.join(distPath, 'index.html'));
 
-  if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
-    const { createServer: createViteServer } = await import('vite');
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
-    });
-    app.use(vite.middlewares);
-  } else if (!process.env.VERCEL) {
-    const distPath = path.join(process.cwd(), 'dist');
+  if (process.env.NODE_ENV === 'production' || hasDist) {
     app.use(express.static(distPath));
     app.get('*', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
+    });
+  } else if (!process.env.VERCEL) {
+    const { createServer: createViteServer } = await import('vite');
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: 'custom',
+    });
+    app.use(vite.middlewares);
+    app.use('*', async (req, res, next) => {
+      try {
+        let template = fs.readFileSync(path.resolve(process.cwd(), 'index.html'), 'utf-8');
+        template = await vite.transformIndexHtml(req.originalUrl, template);
+        res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
+      } catch (e: any) {
+        next(e);
+      }
     });
   }
 

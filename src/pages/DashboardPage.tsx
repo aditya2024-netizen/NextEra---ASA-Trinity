@@ -52,25 +52,33 @@ export const DashboardPage: React.FC = () => {
   const [topHighRiskPatients, setTopHighRiskPatients] = useState<Patient[]>([]);
   const [trends, setTrends] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+
+  const loadDashboardData = React.useCallback(async () => {
+    try {
+      const [patientsRes, trendsRes] = await Promise.all([
+        api.getPatients({ riskLevel: 'HIGH', limit: 5, sortBy: 'riskScore', sortOrder: 'desc' }),
+        api.getDashboardTrends(),
+      ]);
+      if (patientsRes.success) setTopHighRiskPatients(patientsRes.data);
+      if (trendsRes.success) setTrends(trendsRes.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const loadDashboardData = async () => {
-      setLoading(true);
-      try {
-        const [patientsRes, trendsRes] = await Promise.all([
-          api.getPatients({ riskLevel: 'HIGH', limit: 5, sortBy: 'riskScore', sortOrder: 'desc' }),
-          api.getDashboardTrends(),
-        ]);
-        if (patientsRes.success) setTopHighRiskPatients(patientsRes.data);
-        if (trendsRes.success) setTrends(trendsRes.data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
+    setLoading(true);
     loadDashboardData();
-  }, []);
+  }, [loadDashboardData]);
+
+  const handleFullRefresh = async () => {
+    setIsRefreshing(true);
+    await Promise.all([refreshDashboard(), loadDashboardData()]);
+  };
 
   const highCount = summary?.highRiskPatients ?? (summary as any)?.highRiskCount ?? 186;
   const mediumCount = summary?.mediumRiskPatients ?? (summary as any)?.mediumRiskCount ?? 422;
@@ -109,11 +117,12 @@ export const DashboardPage: React.FC = () => {
         {/* Quick Action Buttons */}
         <div className="flex items-center gap-2">
           <button
-            onClick={() => refreshDashboard()}
-            className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors"
+            onClick={handleFullRefresh}
+            disabled={isRefreshing}
+            className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
-            Refresh
+            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? 'Refreshing...' : 'Refresh'}
           </button>
 
           <button

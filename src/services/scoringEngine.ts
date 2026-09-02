@@ -69,40 +69,30 @@ export function calculatePatientRisk(
   const recommendedActions: string[] = [];
 
   // Extract weights & thresholds safely
-  const wMissed = config.weights?.missedAppointmentsWeight ?? config.maxMissedPoints ?? 40;
-  const wDistance = config.weights?.distanceWeight ?? config.maxDistancePoints ?? 20;
-  const wAttendance = config.weights?.attendanceRateWeight ?? config.maxAttendancePoints ?? 20;
-  const wFrequency = config.weights?.appointmentFrequencyWeight ?? config.maxFrequencyPoints ?? 10;
-  const wDuration = config.weights?.treatmentDurationWeight ?? config.maxDurationPoints ?? 10;
+  const wMissed = config.maxMissedPoints ?? config.weights?.missedAppointmentsWeight ?? 35;
+  const wDistance = config.maxDistancePoints ?? config.weights?.distanceWeight ?? 20;
+  const wAttendance = config.maxAttendancePoints ?? config.weights?.attendanceRateWeight ?? 20;
+  const wFrequency = config.maxFrequencyPoints ?? config.weights?.appointmentFrequencyWeight ?? 10;
+  const wDuration = config.maxDurationPoints ?? config.weights?.treatmentDurationWeight ?? 10;
+  const wAge = config.maxAgePoints ?? config.weights?.ageWeight ?? 5;
 
   const highMin = config.thresholds?.highMin ?? config.highRiskThreshold ?? 60;
   const lowMax = config.thresholds?.lowMax ?? (config.mediumRiskThreshold ? config.mediumRiskThreshold - 1 : 29);
 
   // ==========================================
-  // FACTOR 1: Missed Appointments (Max 40 pts)
+  // FACTOR 1: Missed Appointments (Max 35 pts)
   // Reflects prior broken follow-up commitments
   // ==========================================
-  let missedPoints = 0;
-  if (missedAppointments === 0) {
-    missedPoints = 0;
-  } else if (missedAppointments === 1) {
-    missedPoints = 10;
-  } else if (missedAppointments === 2) {
-    missedPoints = 20;
-  } else if (missedAppointments === 3) {
-    missedPoints = 30;
-  } else {
-    missedPoints = 40; // 4 or more
-  }
+  let missedPoints = Math.min(missedAppointments * 7, 35);
 
-  const scaledMissedPoints = Math.round((missedPoints / 40) * wMissed);
+  const scaledMissedPoints = Math.round((missedPoints / 35) * wMissed);
 
   factors.push({
     name: 'Missed Appointments',
     rawValue: `${missedAppointments} missed out of ${totalAppointments}`,
     points: scaledMissedPoints,
     maxPoints: wMissed,
-    impact: scaledMissedPoints >= 25 ? 'HIGH' : scaledMissedPoints >= 10 ? 'MEDIUM' : 'LOW',
+    impact: scaledMissedPoints >= 21 ? 'HIGH' : scaledMissedPoints >= 10 ? 'MEDIUM' : 'LOW',
     category: 'History',
     explanation: missedAppointments > 0 
       ? `Patient has accumulated ${missedAppointments} missed visit(s), indicating recurring follow-up friction.`
@@ -122,18 +112,7 @@ export function calculatePatientRisk(
   // FACTOR 2: Distance from Hospital (Max 20 pts)
   // Measures logistical and geographic transit barrier
   // ==========================================
-  let distancePoints = 0;
-  if (distanceKm < 5) {
-    distancePoints = 0;
-  } else if (distanceKm <= 15) {
-    distancePoints = 5;
-  } else if (distanceKm <= 30) {
-    distancePoints = 10;
-  } else if (distanceKm <= 50) {
-    distancePoints = 15;
-  } else {
-    distancePoints = 20; // > 50 km
-  }
+  let distancePoints = Math.min((distanceKm / 45) * 20, 20);
 
   const scaledDistancePoints = Math.round((distancePoints / 20) * wDistance);
 
@@ -142,7 +121,7 @@ export function calculatePatientRisk(
     rawValue: `${distanceKm} km`,
     points: scaledDistancePoints,
     maxPoints: wDistance,
-    impact: scaledDistancePoints >= 15 ? 'HIGH' : scaledDistancePoints >= 8 ? 'MEDIUM' : 'LOW',
+    impact: scaledDistancePoints >= 14 ? 'HIGH' : scaledDistancePoints >= 7 ? 'MEDIUM' : 'LOW',
     category: 'Distance',
     explanation: distanceKm >= 30 
       ? `Patient resides ${distanceKm} km away from hospital facility, presenting significant transit barrier.`
@@ -162,18 +141,7 @@ export function calculatePatientRisk(
   // FACTOR 3: Historical Attendance Consistency (Max 20 pts)
   // Evaluates longitudinal reliability while avoiding double-counting
   // ==========================================
-  let attendancePoints = 0;
-  if (attendanceRate >= 90) {
-    attendancePoints = 0;
-  } else if (attendanceRate >= 80) {
-    attendancePoints = 5;
-  } else if (attendanceRate >= 65) {
-    attendancePoints = 10;
-  } else if (attendanceRate >= 50) {
-    attendancePoints = 15;
-  } else {
-    attendancePoints = 20; // < 50%
-  }
+  let attendancePoints = Math.min(((100 - attendanceRate) / 50) * 20, 20);
 
   const scaledAttendancePoints = Math.round((attendancePoints / 20) * wAttendance);
 
@@ -182,7 +150,7 @@ export function calculatePatientRisk(
     rawValue: `${attendanceRate}% rate`,
     points: scaledAttendancePoints,
     maxPoints: wAttendance,
-    impact: scaledAttendancePoints >= 15 ? 'HIGH' : scaledAttendancePoints >= 8 ? 'MEDIUM' : 'LOW',
+    impact: scaledAttendancePoints >= 14 ? 'HIGH' : scaledAttendancePoints >= 7 ? 'MEDIUM' : 'LOW',
     category: 'History',
     explanation: attendanceRate < 70 
       ? `Overall historical attendance rate is low (${attendanceRate}%), showing long-term schedule irregularity.`
@@ -202,16 +170,7 @@ export function calculatePatientRisk(
   // FACTOR 4: Follow-up Appointment Frequency (Max 10 pts)
   // Long intervals cause recall decay and forgotten dates
   // ==========================================
-  let frequencyPoints = 0;
-  if (appointmentFrequencyDays > 90) {
-    frequencyPoints = 10;
-  } else if (appointmentFrequencyDays > 60) {
-    frequencyPoints = 7;
-  } else if (appointmentFrequencyDays > 30) {
-    frequencyPoints = 4;
-  } else {
-    frequencyPoints = 0;
-  }
+  let frequencyPoints = Math.min((appointmentFrequencyDays / 90) * 10, 10);
 
   const scaledFreqPoints = Math.round((frequencyPoints / 10) * wFrequency);
 
@@ -238,16 +197,7 @@ export function calculatePatientRisk(
   // FACTOR 5: Treatment Duration Fatigue (Max 10 pts)
   // Chronic care fatigue accumulates over prolonged multi-month regimens
   // ==========================================
-  let durationPoints = 0;
-  if (treatmentDurationMonths >= 18) {
-    durationPoints = 10;
-  } else if (treatmentDurationMonths >= 12) {
-    durationPoints = 7;
-  } else if (treatmentDurationMonths >= 6) {
-    durationPoints = 4;
-  } else {
-    durationPoints = 0;
-  }
+  let durationPoints = Math.min((treatmentDurationMonths / 24) * 10, 10);
 
   const scaledDurationPoints = Math.round((durationPoints / 10) * wDuration);
 
@@ -273,19 +223,12 @@ export function calculatePatientRisk(
   // Reflects senior transit vulnerability or pediatric dependency
   // ==========================================
   let agePoints = 0;
-  if (age >= 75) {
-    agePoints = 5;
-  } else if (age >= 65) {
-    agePoints = 4;
-  } else if (age < 12) {
-    agePoints = 3;
-  } else if (age >= 55) {
-    agePoints = 2;
-  } else {
-    agePoints = 0;
+  if (age > 50) {
+    agePoints = Math.min(((age - 50) / 50) * 5, 5);
+  } else if (age < 18) {
+    agePoints = Math.min(((18 - age) / 18) * 5, 5);
   }
 
-  const wAge = config.weights?.ageWeight ?? config.maxAgePoints ?? 5;
   const scaledAgePoints = Math.round((agePoints / 5) * wAge);
 
   factors.push({
@@ -427,12 +370,14 @@ export function calculatePatientRisk(
 
   const evidenceCoverage = `Reviewed ${totalAppointments} historical appointments recorded across ${treatmentDurationMonths} months of outpatient care.`;
   const responsibleAiNote = 'All 6 clinical and demographic factors (missed visits, distance, attendance history, cadence, treatment duration, age) contribute with bounded, explainable point weights.';
+  const confidence = totalAppointments >= 6 ? 0.96 : totalAppointments >= 3 ? 0.91 : 0.85;
 
   return {
     id: `PRED-${id}-${Math.floor(100000 + Math.random() * 900000)}`,
     patientId: id,
     score,
     riskLevel,
+    confidence,
     evidenceCoverage,
     predictionDate: new Date().toISOString(),
     modelVersion: 'CareTrack Explainable Rule Engine v2.5',

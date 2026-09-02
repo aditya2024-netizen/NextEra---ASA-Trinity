@@ -10,6 +10,22 @@ import {
 
 const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || '/api';
 
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('caretrack_token');
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
+};
+
+const authFetch = async (url: string, options: any = {}) => {
+  const headers = { 
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+    ...options.headers, 
+    ...getAuthHeaders() 
+  };
+  return fetch(url, { ...options, headers });
+};
+
 export const api = {
   // Auth
   async login(email: string, password?: string): Promise<{ success: boolean; token: string; user: StaffUser; message?: string }> {
@@ -39,12 +55,12 @@ export const api = {
   },
 
   async getUsers(): Promise<{ success: boolean; data: StaffUser[] }> {
-    const res = await fetch(`${API_BASE}/users`);
+    const res = await authFetch(`${API_BASE}/users`);
     return res.json();
   },
 
   async deleteUser(email: string): Promise<{ success: boolean; message: string }> {
-    const res = await fetch(`${API_BASE}/users/${encodeURIComponent(email)}`, {
+    const res = await authFetch(`${API_BASE}/users/${encodeURIComponent(email)}`, {
       method: 'DELETE',
     });
     return res.json();
@@ -71,7 +87,7 @@ export const api = {
     if (params.page) query.set('page', String(params.page));
     if (params.limit) query.set('limit', String(params.limit));
 
-    const res = await fetch(`${API_BASE}/patients?${query.toString()}`);
+    const res = await authFetch(`${API_BASE}/patients?${query.toString()}`);
     return res.json();
   },
 
@@ -84,12 +100,12 @@ export const api = {
       riskAnalysis: RiskPrediction;
     };
   }> {
-    const res = await fetch(`${API_BASE}/patients/${id}`);
+    const res = await authFetch(`${API_BASE}/patients/${id}`);
     return res.json();
   },
 
   async createPatient(patientData: Partial<Patient>): Promise<{ success: boolean; data: Patient; message: string }> {
-    const res = await fetch(`${API_BASE}/patients`, {
+    const res = await authFetch(`${API_BASE}/patients`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(patientData),
@@ -98,7 +114,7 @@ export const api = {
   },
 
   async updatePatient(id: string, updates: Partial<Patient>): Promise<{ success: boolean; data: Patient }> {
-    const res = await fetch(`${API_BASE}/patients/${id}`, {
+    const res = await authFetch(`${API_BASE}/patients/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updates),
@@ -117,7 +133,7 @@ export const api = {
     totalAppointments: number;
     attendedAppointments: number;
   }): Promise<{ success: boolean; data: RiskPrediction }> {
-    const res = await fetch(`${API_BASE}/predictions/predict`, {
+    const res = await authFetch(`${API_BASE}/predictions/predict`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(input),
@@ -126,13 +142,13 @@ export const api = {
   },
 
   async getPredictionHistory(): Promise<{ success: boolean; data: RiskPrediction[] }> {
-    const res = await fetch(`${API_BASE}/predictions`);
+    const res = await authFetch(`${API_BASE}/predictions`);
     return res.json();
   },
 
   // Analyzer
   async runAnalyzer(patientData: any): Promise<{ success: boolean; data: any; message: string }> {
-    const res = await fetch(`${API_BASE}/analyzer/process`, {
+    const res = await authFetch(`${API_BASE}/analyzer/process`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(patientData),
@@ -151,7 +167,7 @@ export const api = {
     notes?: string;
     confirmFollowUpDate?: string;
   }): Promise<{ success: boolean; data: any; message: string }> {
-    const res = await fetch(`${API_BASE}/patients/${payload.patientId}/contact`, {
+    const res = await authFetch(`${API_BASE}/patients/${payload.patientId}/contact`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -161,7 +177,7 @@ export const api = {
 
   // Interventions
   async createIntervention(intervention: Partial<Intervention>): Promise<{ success: boolean; data: Intervention }> {
-    const res = await fetch(`${API_BASE}/interventions`, {
+    const res = await authFetch(`${API_BASE}/interventions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(intervention),
@@ -170,7 +186,7 @@ export const api = {
   },
 
   async getInterventions(status: string = 'ALL'): Promise<{ success: boolean; data: Intervention[] }> {
-    const res = await fetch(`${API_BASE}/interventions?status=${status}`);
+    const res = await authFetch(`${API_BASE}/interventions?status=${status}`);
     return res.json();
   },
 
@@ -180,7 +196,7 @@ export const api = {
     notes?: string,
     patientConfirmedNextVisit?: boolean
   ): Promise<{ success: boolean; data: Intervention }> {
-    const res = await fetch(`${API_BASE}/interventions/${id}/status`, {
+    const res = await authFetch(`${API_BASE}/interventions/${id}/status`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status, notes, patientConfirmedNextVisit }),
@@ -190,12 +206,12 @@ export const api = {
 
   // Dashboard
   async getDashboardSummary(): Promise<{ success: boolean; data: DashboardSummary }> {
-    const res = await fetch(`${API_BASE}/dashboard/summary`);
+    const res = await authFetch(`${API_BASE}/dashboard/summary`);
     return res.json();
   },
 
   async getRiskDistribution(): Promise<{ success: boolean; data: { name: string; value: number; color: string }[] }> {
-    const res = await fetch(`${API_BASE}/dashboard/risk-distribution`);
+    const res = await authFetch(`${API_BASE}/dashboard/risk-distribution`);
     return res.json();
   },
 
@@ -208,18 +224,18 @@ export const api = {
       interventionSuccessChart: { type: string; attempted: number; confirmed: number; successRate: number }[];
     };
   }> {
-    const res = await fetch(`${API_BASE}/dashboard/trends`);
+    const res = await authFetch(`${API_BASE}/dashboard/trends`);
     return res.json();
   },
 
   // Settings
   async getScoringConfig(): Promise<{ success: boolean; data: ScoringConfiguration }> {
-    const res = await fetch(`${API_BASE}/settings/config`);
+    const res = await authFetch(`${API_BASE}/settings/config`);
     return res.json();
   },
 
   async updateScoringConfig(config: ScoringConfiguration): Promise<{ success: boolean; data: ScoringConfiguration; message: string }> {
-    const res = await fetch(`${API_BASE}/settings/config`, {
+    const res = await authFetch(`${API_BASE}/settings/config`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(config),
@@ -229,12 +245,12 @@ export const api = {
 
   // Demo Controls
   async resetDemo(): Promise<{ success: boolean; message: string }> {
-    const res = await fetch(`${API_BASE}/demo/reset`, { method: 'POST' });
+    const res = await authFetch(`${API_BASE}/demo/reset`, { method: 'POST' });
     return res.json();
   },
 
   async generateDemoData(count: number): Promise<{ success: boolean; message: string; count: number }> {
-    const res = await fetch(`${API_BASE}/demo/generate`, {
+    const res = await authFetch(`${API_BASE}/demo/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ count }),
@@ -244,7 +260,7 @@ export const api = {
 
   // AI Operations Assistant
   async askAssistant(message: string): Promise<{ success: boolean; reply: string }> {
-    const res = await fetch(`${API_BASE}/assistant/chat`, {
+    const res = await authFetch(`${API_BASE}/assistant/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message }),
@@ -254,7 +270,7 @@ export const api = {
 
   // Audit Logs
   async getAuditLogs(): Promise<{ success: boolean; data: AuditLog[] }> {
-    const res = await fetch(`${API_BASE}/audit-logs`);
+    const res = await authFetch(`${API_BASE}/audit-logs`);
     return res.json();
   },
 };

@@ -6,18 +6,37 @@ import {
   ShieldCheck, 
   HeartPulse, 
   AlertCircle,
+  CheckCircle2,
+  RefreshCw,
   Eye,
   EyeOff
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export const LoginPage: React.FC = () => {
-  const { login } = useAuth();
+  const { login, isAuthenticating, authStatusMessage, lastLogoutNotice, clearLogoutNotice } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleQuickLogin = async (quickEmail: string, quickPass: string) => {
+    setEmail(quickEmail);
+    setPassword(quickPass);
+    setError(null);
+    setIsLoading(true);
+    try {
+      const res = await login(quickEmail, quickPass);
+      if (!res.success) {
+        setError(res.message || 'Login failed. Please verify credentials.');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Login failed.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,6 +95,32 @@ export const LoginPage: React.FC = () => {
               Enter your registered hospital email and password to access the portal
             </p>
           </div>
+
+          {lastLogoutNotice && (
+            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between gap-2.5 text-xs text-emerald-800 animate-in fade-in">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span className="font-semibold">{lastLogoutNotice}</span>
+              </div>
+              <button 
+                type="button" 
+                onClick={clearLogoutNotice}
+                className="text-emerald-600 hover:text-emerald-900 text-xs font-bold px-1.5 py-0.5 rounded cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
+          {isAuthenticating && (
+            <div className="p-3.5 bg-blue-50 border border-blue-200 rounded-xl flex items-center gap-2.5 text-xs text-blue-900 animate-in fade-in">
+              <RefreshCw className="w-4 h-4 text-blue-600 animate-spin shrink-0" />
+              <div>
+                <p className="font-bold text-blue-800">{authStatusMessage || 'Authenticating clinical credentials...'}</p>
+                <p className="text-[11px] text-blue-600">Verifying ABDM clinical permissions & initializing workspace...</p>
+              </div>
+            </div>
+          )}
 
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2.5 text-xs text-red-700 animate-in fade-in">
@@ -154,34 +199,38 @@ export const LoginPage: React.FC = () => {
             <div className="grid grid-cols-2 gap-2 text-xs">
               <button
                 type="button"
-                onClick={() => { setEmail('doctor@caretrack.in'); setPassword('password123'); }}
-                className="p-2 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-800 font-bold text-left transition-colors cursor-pointer"
+                disabled={isLoading}
+                onClick={() => handleQuickLogin('doctor@caretrack.in', 'password123')}
+                className="p-2.5 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-800 font-bold text-left transition-all cursor-pointer disabled:opacity-50 hover:shadow-xs active:scale-[0.98]"
               >
-                👨‍⚕️ Doctor Login
+                👨‍⚕️ Doctor 1-Click Login
                 <span className="block text-[10px] font-normal text-blue-600">Dr. Rajesh Kulkarni</span>
               </button>
               <button
                 type="button"
-                onClick={() => { setEmail('admin@caretrack.in'); setPassword('password123'); }}
-                className="p-2 rounded-lg bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-800 font-bold text-left transition-colors cursor-pointer"
+                disabled={isLoading}
+                onClick={() => handleQuickLogin('admin@caretrack.in', 'password123')}
+                className="p-2.5 rounded-lg bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-800 font-bold text-left transition-all cursor-pointer disabled:opacity-50 hover:shadow-xs active:scale-[0.98]"
               >
-                🏥 Admin Login
+                🏥 Admin 1-Click Login
                 <span className="block text-[10px] font-normal text-purple-600">Dr. Aruna Swaminathan</span>
               </button>
               <button
                 type="button"
-                onClick={() => { setEmail('coordinator@caretrack.in'); setPassword('password123'); }}
-                className="p-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 font-bold text-left transition-colors cursor-pointer"
+                disabled={isLoading}
+                onClick={() => handleQuickLogin('coordinator@caretrack.in', 'password123')}
+                className="p-2.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 font-bold text-left transition-all cursor-pointer disabled:opacity-50 hover:shadow-xs active:scale-[0.98]"
               >
-                📞 Coordinator
+                📞 Coordinator 1-Click
                 <span className="block text-[10px] font-normal text-emerald-600">Amit Verma</span>
               </button>
               <button
                 type="button"
-                onClick={() => { setEmail('nurse@caretrack.in'); setPassword('password123'); }}
-                className="p-2 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 font-bold text-left transition-colors cursor-pointer"
+                disabled={isLoading}
+                onClick={() => handleQuickLogin('nurse@caretrack.in', 'password123')}
+                className="p-2.5 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 font-bold text-left transition-all cursor-pointer disabled:opacity-50 hover:shadow-xs active:scale-[0.98]"
               >
-                👩‍⚕️ Nurse Triage
+                👩‍⚕️ Nurse 1-Click Login
                 <span className="block text-[10px] font-normal text-amber-600">Sister Meena Pillai</span>
               </button>
             </div>

@@ -8,7 +8,8 @@ import {
   LogOut,
   User,
   ShieldCheck,
-  Activity
+  Activity,
+  RefreshCw
 } from 'lucide-react';
 import { UserRole } from '../types';
 
@@ -22,7 +23,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
     setCurrentPage, 
     setIsAiDrawerOpen, 
   } = useApp();
-  const { user, isAdmin, logout } = useAuth();
+  const { user, isAdmin, logout, isLoggingOut } = useAuth();
 
   const getRoleLabel = (role?: UserRole) => {
     switch (role) {
@@ -88,9 +89,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
           className="px-3 py-1 rounded-full bg-red-50 border border-red-200 text-red-700 hover:bg-red-100 transition-colors flex items-center gap-2 text-xs font-bold"
         >
           <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-          <span>{summary?.highRiskPatients || 4} High-Risk Patients</span>
+          <span>{summary?.highRiskPatients ?? 184} High-Risk Patients</span>
           <span className="text-[11px] font-normal text-red-600 hidden lg:inline">
-            ({summary?.followUpsDueThisWeek || 6} due this week)
+            ({summary?.followUpsDueThisWeek ?? 295} due this week)
           </span>
         </button>
       </div>
@@ -126,11 +127,21 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
         {/* Log Out Button */}
         <button
           onClick={logout}
-          className="px-3 py-1.5 text-slate-600 hover:text-red-700 hover:bg-red-50 rounded-lg border border-slate-200 hover:border-red-200 transition-colors flex items-center gap-1 text-xs font-bold"
+          disabled={isLoggingOut}
+          className="px-3.5 py-1.5 text-slate-700 hover:text-red-700 hover:bg-red-50 rounded-lg border border-slate-200 hover:border-red-200 transition-colors flex items-center gap-1.5 text-xs font-bold cursor-pointer disabled:opacity-50"
           title="Sign Out of Portal"
         >
-          <LogOut className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Sign Out</span>
+          {isLoggingOut ? (
+            <>
+              <RefreshCw className="w-3.5 h-3.5 text-red-600 animate-spin" />
+              <span className="hidden sm:inline">Signing out...</span>
+            </>
+          ) : (
+            <>
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Sign Out</span>
+            </>
+          )}
         </button>
       </div>
     </header>

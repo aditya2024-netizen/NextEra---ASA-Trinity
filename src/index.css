@@ -1,1 +1,27 @@
 @import "tailwindcss";
+
+body { 
+  overflow-x: hidden; 
+}
+
+/* Enforce hand/finger pointer across all buttons and interactive controls */
+button,
+[role="button"],
+a,
+select,
+input[type="submit"],
+input[type="button"],
+input[type="reset"],
+input[type="checkbox"],
+input[type="radio"],
+input[type="range"],
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
+button:disabled,
+[role="button"][aria-disabled="true"],
+input:disabled {
+  cursor: not-allowed !important;
+}
+

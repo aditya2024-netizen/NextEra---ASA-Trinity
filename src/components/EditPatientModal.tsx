@@ -34,7 +34,7 @@ const INDIAN_LANGUAGES = [
 ];
 
 export const EditPatientModal: React.FC = () => {
-  const { editPatientModal, setEditPatientModal, addToast, refreshDashboard, viewPatientDetails } = useApp();
+  const { editPatientModal, setEditPatientModal, addToast, refreshDashboard, viewPatientDetails, triggerPatientRefresh } = useApp();
   const { isAdmin, user } = useAuth();
 
   const [formData, setFormData] = useState<Partial<Patient>>({});
@@ -90,6 +90,7 @@ export const EditPatientModal: React.FC = () => {
         addToast('success', 'Patient Details Updated', `Administrator updated details for ${formData.name} (${editPatientModal.patientCode}).`);
         setEditPatientModal(null);
         await refreshDashboard();
+        triggerPatientRefresh();
         viewPatientDetails(editPatientModal.id);
       } else {
         setErrorMsg('Failed to update patient details.');

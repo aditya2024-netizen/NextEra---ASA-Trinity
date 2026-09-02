@@ -23,6 +23,7 @@ export const InterventionsPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [search, setSearch] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
   const fetchInterventions = async () => {
     setLoading(true);
@@ -35,6 +36,19 @@ export const InterventionsPage: React.FC = () => {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleManualRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await Promise.all([
+        fetchInterventions(),
+        refreshDashboard()
+      ]);
+      addToast('success', 'Interventions Refreshed', 'Latest outreach tracking records synchronized.');
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 400);
     }
   };
 
@@ -81,18 +95,20 @@ export const InterventionsPage: React.FC = () => {
         </div>
 
         <button
-          onClick={() => fetchInterventions()}
-          className="p-2 text-slate-600 hover:bg-slate-100 rounded-xl border border-slate-200 self-start"
-          title="Refresh"
+          onClick={handleManualRefresh}
+          disabled={isRefreshing || loading}
+          className="px-3.5 py-2 text-slate-700 hover:text-blue-700 bg-white hover:bg-blue-50/80 rounded-xl border border-slate-200 hover:border-blue-300 shadow-2xs transition-all flex items-center gap-2 text-xs font-bold self-start cursor-pointer active:scale-95 disabled:opacity-50"
+          title="Refresh Outreach Records"
         >
-          <RefreshCw className="w-4 h-4" />
+          <RefreshCw className={`w-4 h-4 text-blue-600 ${isRefreshing || loading ? 'animate-spin' : ''}`} />
+          <span>Refresh</span>
         </button>
       </div>
 
       {/* Filter Tabs & Search */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
         <div className="flex flex-wrap gap-1.5">
-          {['ALL', 'Contacted', 'Confirmed', 'Rescheduled', 'Completed', 'Escalated'].map(st => (
+          {['ALL', 'Pending', 'Contacted', 'Confirmed', 'Rescheduled', 'Completed', 'Escalated'].map(st => (
             <button
               key={st}
               onClick={() => setStatusFilter(st)}

@@ -25,7 +25,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpenMobile = false, onCloseM
   const { currentPage, setCurrentPage, summary } = useApp();
   const { user } = useAuth();
 
-  const navigationItems: { id: PageView; label: string; icon: any; badge?: number | string; badgeColor?: string }[] = [
+  type NavItem = { id: PageView; label: string; icon: any; badge?: number | string; badgeColor?: string };
+
+  const primaryNavigationItems: NavItem[] = [
     { id: 'dashboard', label: 'Executive Dashboard', icon: LayoutDashboard },
     { 
       id: 'risk-queue', 
@@ -42,15 +44,58 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpenMobile = false, onCloseM
       icon: PhoneForwarded, 
       badge: summary?.interventionsPending || 34,
       badgeColor: 'bg-amber-500 text-slate-900'
-    },
-    { id: 'analytics', label: 'Follow-up Impact & Analytics', icon: BarChart3 },
-    { id: 'settings', label: 'Scoring Model Config', icon: Sliders },
+    }
+  ];
+
+  const secondaryNavigationItems: NavItem[] = [
+    { id: 'analytics', label: 'Follow-up Impact & Analytics', icon: BarChart3 }
+  ];
+
+  const adminNavigationItems: NavItem[] = [
+    { id: 'settings', label: 'Scoring Model Config', icon: Sliders }
   ];
 
   const handleNavClick = (page: PageView) => {
     setCurrentPage(page);
     if (onCloseMobile) onCloseMobile();
   };
+
+  const renderNavGroup = (title: string, items: NavItem[]) => (
+    <div className="mb-2">
+      <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-3 mb-2">
+        {title}
+      </div>
+      <nav className="space-y-1">
+        {items.map(item => {
+          const Icon = item.icon;
+          const isActive = currentPage === item.id;
+
+          return (
+            <button
+              key={item.id}
+              onClick={() => handleNavClick(item.id)}
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all ${
+                isActive
+                  ? 'bg-blue-600 text-white font-bold shadow-md shadow-blue-900/30'
+                  : 'text-slate-400 hover:bg-slate-800/80 hover:text-white'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                <span>{item.label}</span>
+              </div>
+
+              {item.badge !== undefined && (
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${item.badgeColor || 'bg-slate-700 text-slate-300'}`}>
+                  {item.badge}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </nav>
+    </div>
+  );
 
   return (
     <>
@@ -71,66 +116,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpenMobile = false, onCloseM
       `}>
         <div className="space-y-5">
           {/* Main Navigation Header */}
-          <div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-3 mb-2">
-              Clinical Operations
-            </div>
-            <nav className="space-y-1">
-              {navigationItems.map(item => {
-                const Icon = item.icon;
-                const isActive = currentPage === item.id;
-
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => handleNavClick(item.id)}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all ${
-                      isActive
-                        ? 'bg-blue-600 text-white font-bold shadow-md shadow-blue-900/30'
-                        : 'text-slate-400 hover:bg-slate-800/80 hover:text-white'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                      <span>{item.label}</span>
-                    </div>
-
-                    {item.badge !== undefined && (
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${item.badgeColor || 'bg-slate-700 text-slate-300'}`}>
-                        {item.badge}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
-
-          {/* Quick Filter Playbooks */}
-          <div className="p-3 bg-slate-900/70 rounded-xl border border-slate-800 space-y-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block px-1">
-              Urgent Focus Filters
-            </span>
-            <button
-              onClick={() => {
-                setCurrentPage('risk-queue');
-                if (onCloseMobile) onCloseMobile();
-              }}
-              className="w-full text-left px-2.5 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-blue-400 transition-colors flex items-center justify-between"
-            >
-              <span>🚨 Due in 7 Days</span>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
-            </button>
-            <button
-              onClick={() => {
-                setCurrentPage('risk-queue');
-                if (onCloseMobile) onCloseMobile();
-              }}
-              className="w-full text-left px-2.5 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-blue-400 transition-colors flex items-center justify-between"
-            >
-              <span>📍 Distance (&gt;30 km)</span>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
-            </button>
+          <div className="space-y-4">
+            {renderNavGroup('Clinical Operations', primaryNavigationItems)}
+            {renderNavGroup('Insights & Analytics', secondaryNavigationItems)}
+            {user?.role === 'ADMIN' && renderNavGroup('Admin Settings', adminNavigationItems)}
           </div>
         </div>
 

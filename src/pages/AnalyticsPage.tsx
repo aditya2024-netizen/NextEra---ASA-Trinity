@@ -114,7 +114,7 @@ export const AnalyticsPage: React.FC = () => {
           <span className="text-xs font-bold text-amber-800 uppercase tracking-wider block mb-1">
             Clinic Revenue Preserved
           </span>
-          <span className="text-3xl font-extrabold text-slate-900 block">$74,400</span>
+          <span className="text-3xl font-extrabold text-slate-900 block">₹6,20,000</span>
           <p className="text-[11px] text-amber-700 mt-2 flex items-center gap-1 font-semibold">
             <TrendingUp className="w-3.5 h-3.5" /> Capacity recovered
           </p>

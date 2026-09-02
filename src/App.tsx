@@ -4,6 +4,7 @@ import { AppProvider, useApp } from './context/AppContext';
 import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
 import { ToastContainer } from './components/Toast';
+import { RefreshCw } from 'lucide-react';
 
 // Modals & Overlays
 import { RiskExplanationModal } from './components/RiskExplanationModal';
@@ -92,13 +93,24 @@ const MainLayout: React.FC = () => {
 };
 
 const AuthGate: React.FC = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoggingOut } = useAuth();
 
-  if (!isAuthenticated) {
-    return <LoginPage />;
-  }
-
-  return <MainLayout />;
+  return (
+    <>
+      {isLoggingOut && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex flex-col items-center justify-center text-white space-y-3 animate-in fade-in duration-200">
+          <div className="w-12 h-12 rounded-2xl bg-rose-600/20 border border-rose-500/40 flex items-center justify-center">
+            <RefreshCw className="w-6 h-6 text-rose-400 animate-spin" />
+          </div>
+          <div className="text-center">
+            <h3 className="font-bold text-base">Signing Out of CareTrack AI</h3>
+            <p className="text-xs text-slate-400 mt-1">Securing clinical session and clearing credentials...</p>
+          </div>
+        </div>
+      )}
+      {!isAuthenticated ? <LoginPage /> : <MainLayout />}
+    </>
+  );
 };
 
 export function App() {

@@ -13,6 +13,7 @@ import {
   Calendar, 
   User, 
   AlertCircle, 
+  AlertTriangle,
   Sparkles,
   Share2,
   Copy,
@@ -20,7 +21,7 @@ import {
 } from 'lucide-react';
 
 export const ContactPatientModal: React.FC = () => {
-  const { contactPatientModal, setContactPatientModal, addToast, refreshDashboard, viewPatientDetails } = useApp();
+  const { contactPatientModal, setContactPatientModal, addToast, refreshDashboard, viewPatientDetails, triggerPatientRefresh } = useApp();
   const { isAdmin, user } = useAuth();
 
   const [channel, setChannel] = useState<'PHONE_CALL' | 'SMS' | 'WHATSAPP'>('PHONE_CALL');
@@ -39,7 +40,7 @@ export const ContactPatientModal: React.FC = () => {
       const patient = contactPatientModal.patient;
       const findings = contactPatientModal.findings;
 
-      setPhoneNumber(patient.phone || '+1 (555) 019-2830');
+      setPhoneNumber(patient.phone || '+91 98250 87654');
       setConfirmFollowUpDate(patient.nextFollowUpDate || '');
       setNotes('');
       setIsCalling(false);
@@ -48,13 +49,13 @@ export const ContactPatientModal: React.FC = () => {
       // Construct draft messages
       const nextDate = patient.nextFollowUpDate || 'upcoming date';
       const cond = patient.condition || 'your health management';
-      const doc = patient.assignedDoctor || 'Dr. Sarah Jenkins';
+      const doc = patient.assignedDoctor || 'Dr. Rajesh Kulkarni, MD, DM';
 
       if (findings?.smsDraft) {
         setMessageContent(findings.smsDraft);
       } else {
         setMessageContent(
-          `[Metro Hospital Clinic] Dear ${patient.name}, your follow-up with ${doc} for ${cond} is scheduled for ${nextDate}. Please confirm your attendance or call +1 (555) 019-2830 if you need transit support.`
+          `[CareTrack AI Hospital] Dear ${patient.name}, your follow-up with ${doc} for ${cond} is scheduled for ${nextDate}. Please confirm your attendance or call +91 11 4050 2000 if you need transit support.`
         );
       }
     }
@@ -113,6 +114,7 @@ export const ContactPatientModal: React.FC = () => {
         );
         setContactPatientModal(null);
         await refreshDashboard();
+        triggerPatientRefresh();
         viewPatientDetails(patient.id);
       } else {
         addToast('error', 'Outreach Error', res.message || 'Failed to dispatch communication.');
@@ -361,23 +363,32 @@ export const ContactPatientModal: React.FC = () => {
           </div>
 
           {/* Footer Actions */}
-          <div className="pt-4 border-t border-slate-200 flex items-center justify-between">
-            <button
-              type="button"
-              onClick={() => setContactPatientModal(null)}
-              className="px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
-            >
-              Cancel
-            </button>
-
-            <button
-              type="submit"
-              disabled={isSending}
-              className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider rounded-lg flex items-center gap-2 transition-colors shadow-sm disabled:opacity-50"
-            >
-              <Send className="w-4 h-4" />
-              <span>{isSending ? 'Recording Dispatch...' : `Complete Outreach & Record`}</span>
-            </button>
+          <div className="pt-2">
+            <div className="mb-3 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg flex items-center justify-between">
+               <span className="text-xs font-bold text-amber-800 flex items-center gap-2">
+                 <AlertTriangle className="w-4 h-4" />
+                 Demo Mode Active
+               </span>
+               <span className="text-[10px] text-amber-700">Live Twilio disabled. Actions will be simulated.</span>
+            </div>
+            <div className="border-t border-slate-200 pt-4 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setContactPatientModal(null)}
+                className="px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+  
+              <button
+                type="submit"
+                disabled={isSending}
+                className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider rounded-lg flex items-center gap-2 transition-colors shadow-sm disabled:opacity-50"
+              >
+                <Send className="w-4 h-4" />
+                <span>{isSending ? 'Recording Dispatch...' : `Complete Outreach & Record`}</span>
+              </button>
+            </div>
           </div>
         </form>
       </div>

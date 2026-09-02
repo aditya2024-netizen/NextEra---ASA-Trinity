@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { Patient, DashboardSummary, ScoringConfiguration, Intervention, AnalyzerFindings } from '../types';
 import { api } from '../services/api';
 import { DEFAULT_SCORING_CONFIG } from '../services/scoringEngine';
+import { useAuth } from './AuthContext';
 
 export type PageView = 
   | 'dashboard'
@@ -55,6 +56,10 @@ interface AppContextType {
   isAdminLoginModalOpen: boolean;
   setIsAdminLoginModalOpen: (open: boolean) => void;
 
+  // Stale Data Prevention Triggers
+  patientRefreshKey: number;
+  triggerPatientRefresh: () => void;
+
   // Global Data & Stats
   summary: DashboardSummary | null;
   scoringConfig: ScoringConfiguration;
@@ -89,6 +94,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [isAiDrawerOpen, setIsAiDrawerOpen] = useState<boolean>(false);
   const [isAdminLoginModalOpen, setIsAdminLoginModalOpen] = useState<boolean>(false);
+
+  const [patientRefreshKey, setPatientRefreshKey] = useState<number>(0);
+  const triggerPatientRefresh = useCallback(() => {
+    setPatientRefreshKey(prev => prev + 1);
+  }, []);
 
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [scoringConfig, setScoringConfig] = useState<ScoringConfiguration>(DEFAULT_SCORING_CONFIG);
@@ -151,9 +161,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, []);
 
+  const { user } = useAuth();
+
   useEffect(() => {
-    refreshDashboard();
-  }, [refreshDashboard]);
+    if (user) {
+      refreshDashboard();
+    } else {
+      setSummary(null);
+    }
+  }, [user, refreshDashboard]);
 
   const updateScoringConfig = async (newConfig: ScoringConfiguration): Promise<boolean> => {
     try {
@@ -230,6 +246,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsAiDrawerOpen,
         isAdminLoginModalOpen,
         setIsAdminLoginModalOpen,
+        patientRefreshKey,
+        triggerPatientRefresh,
         summary,
         scoringConfig,
         updateScoringConfig,

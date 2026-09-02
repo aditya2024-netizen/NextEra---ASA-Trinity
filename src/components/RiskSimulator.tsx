@@ -268,6 +268,35 @@ export const RiskSimulator: React.FC<RiskSimulatorProps> = ({ patient }) => {
               <RiskGauge score={simulatedRisk.score} level={simulatedRisk.riskLevel} size="sm" showLabels={false} />
             </div>
 
+            {/* Factor Points Shift Breakdown */}
+            <div className="p-2.5 rounded-lg bg-white border border-slate-200 text-xs space-y-1.5 mb-2">
+              <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider block">
+                Simulated Factor Points Impact
+              </span>
+              <div className="space-y-1">
+                {simulatedRisk.topFactors.slice(0, 4).map((factor, idx) => {
+                  const baseFactor = originalRisk.topFactors?.find(f => f.name === factor.name);
+                  const basePts = baseFactor?.points ?? 0;
+                  const diff = factor.points - basePts;
+                  return (
+                    <div key={idx} className="flex items-center justify-between text-[11px]">
+                      <span className="text-slate-600 truncate max-w-[160px]">{factor.name}</span>
+                      <div className="flex items-center gap-1.5 font-mono">
+                        <span className="text-slate-500 font-semibold">{factor.points} pts</span>
+                        {diff !== 0 && (
+                          <span className={`text-[10px] font-bold px-1 rounded ${
+                            diff < 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
+                          }`}>
+                            {diff > 0 ? `+${diff}` : diff}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
             <div className="p-2.5 rounded-lg bg-white border border-slate-200 text-xs space-y-1">
               <span className="text-[11px] font-bold text-slate-700 block">Hypothetical Rationale:</span>
               <p className="text-slate-600 italic">"{simulatedRisk.naturalLanguageSummary}"</p>
