@@ -83,13 +83,15 @@ app.use(async (req, res, next) => {
   }
 });
 
-// Normalize route prefix so both /api/... and /... work identically on Vercel
-app.use((req, res, next) => {
-  if (!req.url.startsWith('/api') && !req.url.startsWith('/assets') && req.url !== '/' && !req.url.includes('.')) {
-    req.url = `/api${req.url}`;
-  }
-  next();
-});
+// Normalize route prefix on Vercel serverless if /api was stripped by the platform
+if (process.env.VERCEL) {
+  app.use((req, res, next) => {
+    if (!req.url.startsWith('/api') && !req.url.startsWith('/assets') && req.url !== '/' && !req.url.includes('.')) {
+      req.url = `/api${req.url.startsWith('/') ? '' : '/'}${req.url}`;
+    }
+    next();
+  });
+}
 
 // -------------------------------------------------------------
 // 0. MIDDLEWARE
@@ -116,6 +118,20 @@ const requireRole = (...roles: (string | string[])[]) => (req: any, res: any, ne
   }
   next();
 };
+
+// -------------------------------------------------------------
+// HEALTH CHECK & ROOT API
+// -------------------------------------------------------------
+app.get(['/api', '/api/health'], (req, res) => {
+  res.json({
+    success: true,
+    service: 'CareTrack AI Clinical Operations Platform',
+    status: 'HEALTHY',
+    version: '1.0.0',
+    environment: process.env.VERCEL ? 'vercel-serverless' : (process.env.NODE_ENV || 'development'),
+    timestamp: new Date().toISOString()
+  });
+});
 
 // -------------------------------------------------------------
 // 1. AUTHENTICATION REST API

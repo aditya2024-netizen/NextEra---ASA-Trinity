@@ -1,9 +1,13 @@
 node_modules/
 build/
 dist/
+dist-server/
 coverage/
 .DS_Store
 *.log
 .env*
 !.env.example
 .pgdata/
+.vercel
+api/*.js
+api/*.js.map

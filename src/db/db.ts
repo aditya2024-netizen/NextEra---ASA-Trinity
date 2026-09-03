@@ -60,15 +60,18 @@ export async function initDatabase(): Promise<Pool | null> {
   if (dbUrl) {
     try {
       console.log('[PostgreSQL] Connecting via DATABASE_URL...');
+      const maxConnections = process.env.PG_MAX_CONNECTIONS ? parseInt(process.env.PG_MAX_CONNECTIONS, 10) : 5;
       const testPool = new Pool({
         connectionString: dbUrl,
         ssl: dbUrl.includes('localhost') ? false : { rejectUnauthorized: false },
+        max: maxConnections,
+        idleTimeoutMillis: 30000,
         connectionTimeoutMillis: 5000,
       });
       const client = await testPool.connect();
       client.release();
       pool = testPool;
-      console.log('[PostgreSQL] Connected successfully via DATABASE_URL');
+      console.log(`[PostgreSQL] Connected successfully via DATABASE_URL (pool max: ${maxConnections})`);
     } catch (err) {
       console.warn('[PostgreSQL] Failed to connect via DATABASE_URL, falling back:', err);
     }
@@ -102,7 +105,9 @@ export async function initDatabase(): Promise<Pool | null> {
         fs.mkdirSync(pgDataDir, { recursive: true });
       }
 
-      const { default: EmbeddedPostgres } = await import('embedded-postgres');
+      const pkgName = 'embedded-postgres';
+      const embeddedModule: any = await import(/* @vite-ignore */ pkgName);
+      const EmbeddedPostgres = embeddedModule.default || embeddedModule;
       embeddedInstance = new EmbeddedPostgres({
         databaseDir: pgDataDir,
         port: 5433,
@@ -132,12 +137,14 @@ export async function initDatabase(): Promise<Pool | null> {
     }
   }
 
-  // Graceful shutdown
-  process.on('SIGINT', async () => {
-    if (pool) await pool.end().catch(() => {});
-    if (embeddedInstance) await embeddedInstance.stop().catch(() => {});
-    process.exit(0);
-  });
+  // Graceful shutdown for standalone local server
+  if (!process.env.VERCEL) {
+    process.on('SIGINT', async () => {
+      if (pool) await pool.end().catch(() => {});
+      if (embeddedInstance) await embeddedInstance.stop().catch(() => {});
+      process.exit(0);
+    });
+  }
 
   if (pool) {
     // Create Schemas & Tables

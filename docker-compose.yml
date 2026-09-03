@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: caretrack-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: caretrack
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d caretrack"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: caretrack-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:postgrespassword@db:5432/caretrack
+      JWT_SECRET: caretrack-super-secret-jwt-key-2024
+      # Optional external services:
+      # GEMINI_API_KEY: your-gemini-api-key
+      # TWILIO_ACCOUNT_SID: your-twilio-account-sid
+      # TWILIO_AUTH_TOKEN: your-twilio-auth-token
+      # TWILIO_PHONE_NUMBER: your-twilio-phone-number
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
