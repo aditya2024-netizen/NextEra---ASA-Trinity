@@ -57,6 +57,10 @@ export async function initDatabase(): Promise<Pool | null> {
 
   const dbUrl = process.env.DATABASE_URL;
 
+  if (!dbUrl && process.env.NODE_ENV === 'production') {
+    throw new Error('DATABASE_URL must be configured in production.');
+  }
+
   if (dbUrl) {
     try {
       console.log('[PostgreSQL] Connecting via DATABASE_URL...');
@@ -77,7 +81,7 @@ export async function initDatabase(): Promise<Pool | null> {
     }
   }
 
-  if (!pool && !process.env.VERCEL) {
+  if (!pool) {
     // Check if an external PostgreSQL instance is already running on localhost:5432
     try {
       const testPool = new Pool({
@@ -97,7 +101,7 @@ export async function initDatabase(): Promise<Pool | null> {
     }
   }
 
-  if (!pool && !process.env.VERCEL) {
+  if (!pool) {
     try {
       console.log('[PostgreSQL] Starting persistent Embedded PostgreSQL server on port 5433...');
       const pgDataDir = path.resolve(process.cwd(), '.pgdata');
@@ -138,13 +142,11 @@ export async function initDatabase(): Promise<Pool | null> {
   }
 
   // Graceful shutdown for standalone local server
-  if (!process.env.VERCEL) {
-    process.on('SIGINT', async () => {
-      if (pool) await pool.end().catch(() => {});
-      if (embeddedInstance) await embeddedInstance.stop().catch(() => {});
-      process.exit(0);
-    });
-  }
+  process.on('SIGINT', async () => {
+    if (pool) await pool.end().catch(() => {});
+    if (embeddedInstance) await embeddedInstance.stop().catch(() => {});
+    process.exit(0);
+  });
 
   if (pool) {
     // Create Schemas & Tables

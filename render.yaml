@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: caretrack-ai
+    runtime: node
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: caretrack-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: NODE_ENV
+        value: production
+      - key: PG_MAX_CONNECTIONS
+        value: "5"
+
+databases:
+  - name: caretrack-db
+    databaseName: caretrack
+    user: caretrack
+    plan: free

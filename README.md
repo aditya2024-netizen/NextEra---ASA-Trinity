@@ -84,13 +84,15 @@ cd NextEra---ASA-Trinity
 npm install
 ```
 
-### 3. Environment Variables (Optional)
-Copy `.env.example` to `.env` if you wish to configure live third-party services:
+### 3. Environment Variables
+For local development, copy `.env.example` to `.env`. Render provisions `DATABASE_URL` from the PostgreSQL database defined in `render.yaml` and generates `JWT_SECRET` automatically.
 ```env
 PORT=3000
-DATABASE_URL=                          # Optional external PostgreSQL URL (defaults to embedded PG on port 5433)
-GEMINI_API_KEY=MY_GEMINI_API_KEY      # Optional Gemini API key (defaults to deterministic fallback)
-TWILIO_ACCOUNT_SID=                   # Optional Twilio SID (defaults to Twilio Demo Mode)
+DATABASE_URL=                          # Required in production
+PG_MAX_CONNECTIONS=5
+JWT_SECRET=                            # Required in production
+GEMINI_API_KEY=                        # Optional Gemini API key
+TWILIO_ACCOUNT_SID=                    # Optional; demo mode when omitted
 TWILIO_AUTH_TOKEN=
 TWILIO_PHONE_NUMBER=
 ```
@@ -105,6 +107,10 @@ npm start
 ```
 The application will launch at **`http://localhost:3000`**.  
 PostgreSQL automatically provisions schemas and seeds 1,000 outpatient records on first boot.
+
+### 5. Render Deployment
+
+Create a Blueprint deployment in Render from this repository. Render reads `render.yaml`, creates the web service and PostgreSQL database, builds with `npm ci && npm run build`, and starts with `npm start`. Keep the generated `DATABASE_URL` and `JWT_SECRET` environment variables configured for the web service.
 
 ---
 

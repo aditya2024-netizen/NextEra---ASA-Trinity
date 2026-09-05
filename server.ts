@@ -72,30 +72,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Normalize request path on Vercel Serverless (restore original requested path from rewrites)
-app.use((req, res, next) => {
-  const matchedPath = (req.headers['x-matched-path'] as string) || (req.headers['x-forwarded-uri'] as string) || (req.headers['x-original-url'] as string);
-
-  if (matchedPath && (req.url === '/api' || req.url === '/api/index' || req.url.startsWith('/api/index?') || req.url.includes('[...path]'))) {
-    const qIndex = req.url.indexOf('?');
-    const queryString = qIndex !== -1 ? req.url.substring(qIndex) : '';
-    req.url = matchedPath.includes('?') ? matchedPath : `${matchedPath}${queryString}`;
-  } else if ((req as any).query?.path) {
-    const rawPath = (req as any).query.path;
-    const pathStr = Array.isArray(rawPath) ? rawPath.join('/') : rawPath;
-    const qIndex = req.url.indexOf('?');
-    const queryString = qIndex !== -1 ? req.url.substring(qIndex) : '';
-    req.url = `/api/${pathStr}${queryString}`;
-  }
-
-  // Ensure /api prefix exists if stripped by upstream proxy/platform
-  if (!req.url.startsWith('/api') && !req.url.startsWith('/assets') && req.url !== '/' && !req.url.includes('.')) {
-    req.url = `/api${req.url.startsWith('/') ? '' : '/'}${req.url}`;
-  }
-
-  next();
-});
-
 // Middleware to ensure database is initialized on cold starts
 let dbInitPromise: Promise<any> | null = null;
 app.use(async (req, res, next) => {
@@ -150,7 +126,7 @@ app.get(['/api', '/api/health'], (req, res) => {
     service: 'CareTrack AI Clinical Operations Platform',
     status: 'HEALTHY',
     version: '1.0.0',
-    environment: process.env.VERCEL ? 'vercel-serverless' : (process.env.NODE_ENV || 'development'),
+    environment: process.env.NODE_ENV || 'development',
     timestamp: new Date().toISOString()
   });
 });
@@ -1182,7 +1158,7 @@ export async function startServer() {
     app.get('*', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
-  } else if (!process.env.VERCEL) {
+  } else {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -1209,8 +1185,7 @@ export async function startServer() {
 }
 
 // Only auto-start standalone listener if executed as the main entrypoint
-const isMainScript = !process.env.VERCEL && 
-  process.env.NODE_ENV !== 'test' && 
+const isMainScript = process.env.NODE_ENV !== 'test' &&
   Boolean(process.argv[1] && (process.argv[1].endsWith('server.cjs') || process.argv[1].endsWith('server.ts') || process.argv[1].endsWith('server.js')));
 
 if (isMainScript) {
