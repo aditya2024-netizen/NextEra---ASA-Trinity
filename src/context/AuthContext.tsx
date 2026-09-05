@@ -57,11 +57,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Smooth clinical security feedback delay (700ms)
         await new Promise(resolve => setTimeout(resolve, 700));
 
-        setUser(res.user);
-        localStorage.setItem('caretrack_user', JSON.stringify(res.user));
         if (res.token) {
           localStorage.setItem('caretrack_token', res.token);
         }
+        localStorage.setItem('caretrack_user', JSON.stringify(res.user));
+        setUser(res.user);
         setIsAuthenticating(false);
         setAuthStatusMessage(null);
         return { success: true, message: res.message };

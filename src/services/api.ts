@@ -12,7 +12,19 @@ const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || '/api';
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('caretrack_token');
-  return token ? { 'Authorization': `Bearer ${token}` } : {};
+  const userStr = localStorage.getItem('caretrack_user');
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  if (userStr) {
+    try {
+      const u = JSON.parse(userStr);
+      if (u.name) headers['x-staff-name'] = u.name;
+      if (u.role) headers['x-staff-role'] = u.role;
+    } catch {}
+  }
+  return headers;
 };
 
 const authFetch = async (url: string, options: any = {}) => {
@@ -272,5 +284,11 @@ export const api = {
   async getAuditLogs(): Promise<{ success: boolean; data: AuditLog[] }> {
     const res = await authFetch(`${API_BASE}/audit-logs`);
     return res.json();
+  },
+
+  // Export CSV
+  async exportCsv(): Promise<Blob> {
+    const res = await authFetch(`${API_BASE}/export/csv`);
+    return res.blob();
   },
 };

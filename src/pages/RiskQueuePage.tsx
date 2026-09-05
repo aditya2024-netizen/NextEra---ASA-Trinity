@@ -19,7 +19,8 @@ import {
   ShieldCheck,
   ChevronLeft,
   ChevronRight,
-  ExternalLink
+  ExternalLink,
+  Download
 } from 'lucide-react';
 
 export const RiskQueuePage: React.FC = () => {
@@ -70,6 +71,27 @@ export const RiskQueuePage: React.FC = () => {
     }
   };
 
+  const [isExporting, setIsExporting] = useState<boolean>(false);
+
+  const handleExportCsv = async () => {
+    setIsExporting(true);
+    try {
+      const blob = await api.exportCsv();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `caretrack_risk_queue_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      console.error('Failed to export CSV:', err);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   useEffect(() => {
     fetchQueue();
   }, [search, riskLevel, interventionStatus, dueFilter, sortBy, sortOrder, page]);
@@ -94,6 +116,15 @@ export const RiskQueuePage: React.FC = () => {
 
         {/* Action Controls */}
         <div className="flex items-center gap-2">
+          <button
+            onClick={handleExportCsv}
+            disabled={isExporting}
+            className="px-3.5 py-2 text-slate-700 hover:text-emerald-700 bg-white hover:bg-emerald-50/80 rounded-xl border border-slate-200 hover:border-emerald-300 shadow-2xs transition-all flex items-center gap-2 text-xs font-bold cursor-pointer active:scale-95 disabled:opacity-50"
+            title="Download Risk Queue CSV"
+          >
+            <Download className={`w-4 h-4 text-emerald-600 ${isExporting ? 'animate-bounce' : ''}`} />
+            <span>{isExporting ? 'Exporting...' : 'Export CSV'}</span>
+          </button>
           <button
             onClick={() => fetchQueue()}
             disabled={loading}

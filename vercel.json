@@ -9,7 +9,7 @@
     },
     {
       "source": "/api/(.*)",
-      "destination": "/api/[...path]"
+      "destination": "/api/index"
     },
     {
       "source": "/((?!api|assets|favicon|.*\\..*).*)",

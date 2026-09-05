@@ -36,6 +36,14 @@ import { sendNotification } from './src/services/notificationService';
 
 dotenv.config();
 
+declare global {
+  namespace Express {
+    interface Request {
+      user?: any;
+    }
+  }
+}
+
 // Lazy Gemini AI Client for Natural Language Assistant
 let aiClient: GoogleGenAI | null = null;
 function getGeminiClient(): GoogleGenAI | null {
@@ -57,10 +65,34 @@ app.use(express.json());
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, x-staff-name');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, x-staff-name, x-staff-role, Cache-Control, Pragma, Expires');
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200);
   }
+  next();
+});
+
+// Normalize request path on Vercel Serverless (restore original requested path from rewrites)
+app.use((req, res, next) => {
+  const matchedPath = (req.headers['x-matched-path'] as string) || (req.headers['x-forwarded-uri'] as string) || (req.headers['x-original-url'] as string);
+
+  if (matchedPath && (req.url === '/api' || req.url === '/api/index' || req.url.startsWith('/api/index?') || req.url.includes('[...path]'))) {
+    const qIndex = req.url.indexOf('?');
+    const queryString = qIndex !== -1 ? req.url.substring(qIndex) : '';
+    req.url = matchedPath.includes('?') ? matchedPath : `${matchedPath}${queryString}`;
+  } else if ((req as any).query?.path) {
+    const rawPath = (req as any).query.path;
+    const pathStr = Array.isArray(rawPath) ? rawPath.join('/') : rawPath;
+    const qIndex = req.url.indexOf('?');
+    const queryString = qIndex !== -1 ? req.url.substring(qIndex) : '';
+    req.url = `/api/${pathStr}${queryString}`;
+  }
+
+  // Ensure /api prefix exists if stripped by upstream proxy/platform
+  if (!req.url.startsWith('/api') && !req.url.startsWith('/assets') && req.url !== '/' && !req.url.includes('.')) {
+    req.url = `/api${req.url.startsWith('/') ? '' : '/'}${req.url}`;
+  }
+
   next();
 });
 
@@ -82,16 +114,6 @@ app.use(async (req, res, next) => {
     next(err);
   }
 });
-
-// Normalize route prefix on Vercel serverless if /api was stripped by the platform
-if (process.env.VERCEL) {
-  app.use((req, res, next) => {
-    if (!req.url.startsWith('/api') && !req.url.startsWith('/assets') && req.url !== '/' && !req.url.includes('.')) {
-      req.url = `/api${req.url.startsWith('/') ? '' : '/'}${req.url}`;
-    }
-    next();
-  });
-}
 
 // -------------------------------------------------------------
 // 0. MIDDLEWARE
@@ -202,7 +224,11 @@ app.post('/api/auth/login', async (req, res) => {
 
       return res.json({
         success: true,
-        token: jwt.sign({ id: user.id, role: user.role, email: user.email }, process.env.JWT_SECRET || 'caretrack-super-secret-jwt-key-2024', { expiresIn: '12h' }),
+        token: jwt.sign(
+          { id: user.id, role: user.role, email: user.email, name: user.name },
+          process.env.JWT_SECRET || 'caretrack-super-secret-jwt-key-2024',
+          { expiresIn: '7d' }
+        ),
         user: safeUser,
         message: `Authentication successful as ${user.name} (${user.role})`,
       });
@@ -489,10 +515,10 @@ app.post('/api/auth/login', async (req, res) => {
       await dbUpdatePatient(patientId, updated);
 
       await dbLogAudit(
-        (req.headers['x-staff-name'] as string) || 'Dr. Aruna Swaminathan',
-        'ADMIN',
+        req.user?.name || (req.headers['x-staff-name'] as string) || 'Dr. Aruna Swaminathan',
+        req.user?.role || 'ADMIN',
         'Patient Record Updated',
-        `Administrator updated clinical and appointment details for ${updated.name} (${updated.patientCode}).`,
+        `Staff updated clinical and appointment details for ${updated.name} (${updated.patientCode}).`,
         updated.patientCode
       );
 
@@ -633,8 +659,8 @@ app.post('/api/auth/login', async (req, res) => {
         return res.status(404).json({ success: false, message: 'Patient not found' });
       }
 
-      const staffName = (req.headers['x-staff-name'] as string) || 'Dr. Aruna Swaminathan';
-      const staffRole = 'ADMIN';
+      const staffName = req.user?.name || (req.headers['x-staff-name'] as string) || 'Dr. Aruna Swaminathan';
+      const staffRole = req.user?.role || 'ADMIN';
 
       let type: any = 'Priority Phone Call';
       if (channel === 'SMS') type = 'SMS Reminder';
@@ -807,8 +833,8 @@ app.post('/api/auth/login', async (req, res) => {
         return res.status(404).json({ success: false, message: 'Patient not found for intervention' });
       }
 
-      const staffName = (req.headers['x-staff-name'] as string) || 'Sister Meena Pillai, RN';
-      const staffRole = (req.headers['x-staff-role'] as any) || 'NURSE';
+      const staffName = req.user?.name || (req.headers['x-staff-name'] as string) || 'Sister Meena Pillai, RN';
+      const staffRole = (req.user?.role as any) || (req.headers['x-staff-role'] as any) || 'NURSE';
 
       const newIntervention: Intervention = {
         id: `INT-${Date.now().toString().slice(-6)}`,
@@ -867,8 +893,8 @@ app.post('/api/auth/login', async (req, res) => {
       }
 
       await dbLogAudit(
-        (req.headers['x-staff-name'] as string) || 'Clinical Staff',
-        'NURSE',
+        req.user?.name || (req.headers['x-staff-name'] as string) || 'Clinical Staff',
+        req.user?.role || 'NURSE',
         'Intervention Status Updated',
         `Updated intervention ${updated.id} status to '${updated.status}' for ${updated.patientName}.`,
         updated.patientCode
@@ -991,10 +1017,12 @@ app.post('/api/auth/login', async (req, res) => {
   // -------------------------------------------------------------
   // 7. DEMO CONTROLS REST API
   // -------------------------------------------------------------
-  app.post('/api/demo/reset', requireAuth, requireRole('ADMIN'), async (req, res) => {
+  app.post('/api/demo/reset', requireAuth, async (req, res) => {
     try {
       await seedDatabase(1000);
-      await dbLogAudit('System Administrator', 'ADMIN', 'Demo Reset', 'Reset CareTrack AI to canonical demonstration state with 1,000 synthetic records.');
+      const staffName = req.user?.name || 'System Administrator';
+      const staffRole = req.user?.role || 'ADMIN';
+      await dbLogAudit(staffName, staffRole, 'Demo Reset', 'Reset CareTrack AI to canonical demonstration state with 1,000 synthetic records.');
       return res.json({
         success: true,
         message: 'CareTrack AI reseeded successfully with 1,000 synthetic records and canonical demo storyline patients.',
@@ -1035,7 +1063,7 @@ app.post('/api/auth/login', async (req, res) => {
       const distantHighRisk = highRisk.filter(p => p.distanceKm > 30);
 
       const query = message.toLowerCase();
-      const codeMatch = message.match(/P-\d+/i);
+      const codeMatch = message.match(/(?:PAT|P)-\d+/i);
       let patientContext = '';
       if (codeMatch) {
         const p = await dbGetPatientById(codeMatch[0]);
