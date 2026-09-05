@@ -1063,7 +1063,7 @@ Strict Healthcare Constraints:
 4. If asked "Why is patient [ID] high risk?", explain the top drivers (missed visits, distance, attendance rate, age) and recommended action.`;
 
           const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-3.6-flash',
             contents: [
               { role: 'user', parts: [{ text: `${systemPrompt}\n\nUser Question: ${message}` }] }
             ]
