@@ -178,10 +178,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setScoringConfig(res.data);
         addToast('success', 'Scoring Model Updated', 'Scoring weights saved and all risk ranks recalculated.');
         await refreshDashboard();
+        triggerPatientRefresh();
         return true;
+      } else {
+        addToast('error', 'Update Failed', (res as any).message || 'Failed to update scoring configuration.');
       }
-    } catch (err) {
-      addToast('error', 'Update Failed', 'Failed to update scoring configuration.');
+    } catch (err: any) {
+      addToast('error', 'Update Failed', err?.message || 'Failed to update scoring configuration.');
     }
     return false;
   };
@@ -199,9 +202,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setAnalyzerFindingsModal(res.data);
         addToast('success', 'Analyzer Findings Ready', `Generated deep clinical findings for ${patient.name} (Risk: ${res.data.riskScore}/100).`);
         return res.data;
+      } else {
+        addToast('error', 'Analyzer Error', (res as any).message || 'Could not process patient details in analyzer.');
       }
-    } catch (err) {
-      addToast('error', 'Analyzer Error', 'Could not process patient details in analyzer.');
+    } catch (err: any) {
+      addToast('error', 'Analyzer Error', err?.message || 'Could not process patient details in analyzer.');
     } finally {
       setIsAnalyzing(false);
     }
@@ -210,11 +215,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const resetDemoData = async () => {
     try {
-      await api.resetDemo();
-      await refreshDashboard();
-      addToast('success', 'Demo Reset', 'Reseeded 1,000 synthetic patient records and canonical demo cases.');
-    } catch (e) {
-      addToast('error', 'Reset Failed', 'Could not reset demo database.');
+      const res = await api.resetDemo();
+      if (res.success) {
+        await refreshDashboard();
+        triggerPatientRefresh();
+        addToast('success', 'Demo Reset', 'Reseeded 1,000 synthetic patient records and canonical demo cases.');
+      } else {
+        addToast('error', 'Reset Failed', res.message || 'Could not reset demo database.');
+      }
+    } catch (e: any) {
+      addToast('error', 'Reset Failed', e?.message || 'Could not reset demo database.');
     }
   };
 
