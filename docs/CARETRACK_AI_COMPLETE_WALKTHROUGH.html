@@ -1,0 +1,1784 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Complete beginner-friendly CareTrack AI project walkthrough and demo handbook">
+<title>CareTrack AI (THRIVE) - Complete Project Walkthrough & Demo Handbook</title>
+<style>
+:root { color-scheme: light; --ink:#172033; --muted:#536174; --blue:#1d4ed8; --blue-soft:#eff6ff; --line:#dbe4ef; --panel:#ffffff; --canvas:#f4f7fb; --code:#111827; --warn:#fff7ed; --warn-line:#f59e0b; --quote:#e0f2fe; }
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { margin:0; background:var(--canvas); color:var(--ink); font-family: Georgia, 'Times New Roman', serif; font-size:17px; line-height:1.68; }
+.page { max-width:1180px; margin:0 auto; padding:32px 24px 80px; }
+header.hero { background:linear-gradient(135deg,#102a56,#1d4ed8); color:#fff; border-radius:18px; padding:48px clamp(28px,6vw,76px); box-shadow:0 18px 50px rgba(15,23,42,.16); margin-bottom:28px; }
+.hero h1 { font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; font-size:clamp(2.1rem,5vw,4rem); line-height:1.08; margin:0 0 10px; letter-spacing:-.03em; }
+.hero p { max-width:780px; margin:0; color:#dbeafe; font-size:1.12rem; }
+.hero .badge { display:inline-block; font:700 .75rem/1 system-ui,sans-serif; letter-spacing:.12em; text-transform:uppercase; color:#bfdbfe; margin-bottom:18px; }
+nav.toc { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:24px 30px; margin-bottom:28px; box-shadow:0 6px 20px rgba(15,23,42,.05); }
+nav.toc h2 { margin-top:0; }
+nav.toc ol { columns:2; column-gap:42px; margin-bottom:0; }
+nav.toc li { break-inside:avoid; margin:4px 0; }
+a { color:var(--blue); text-decoration-thickness:1px; text-underline-offset:3px; }
+h1,h2,h3,h4,h5,h6 { font-family:system-ui,-apple-system,'Segoe UI',sans-serif; color:#13213a; line-height:1.22; scroll-margin-top:20px; }
+h1 { font-size:2.4rem; margin:42px 0 18px; }
+h2 { font-size:1.85rem; border-bottom:2px solid var(--line); padding-bottom:10px; margin:38px 0 0; }
+h3 { font-size:1.35rem; margin-top:30px; }
+h4,h5,h6 { font-size:1.08rem; }
+details.section { background:var(--panel); border:1px solid var(--line); border-radius:14px; margin:22px 0; box-shadow:0 5px 18px rgba(15,23,42,.04); overflow:hidden; }
+details.section summary { cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; gap:18px; padding:18px 24px; font:750 1.85rem/1.22 system-ui,sans-serif; color:#13213a; }
+details.section summary::-webkit-details-marker { display:none; }
+details.section summary:before { content:'+'; flex:0 0 auto; order:2; width:1.7rem; height:1.7rem; border:1px solid #93c5fd; border-radius:50%; display:grid; place-items:center; color:var(--blue); font:700 1.2rem/1 system-ui,sans-serif; }
+details.section[open] summary:before { content:'-'; }
+.summary-hint { color:#718096; font:600 .72rem/1 system-ui,sans-serif; letter-spacing:.08em; text-transform:uppercase; margin-left:auto; white-space:nowrap; }
+.section-content { padding:0 28px 30px; }
+.section-content > h3:first-child { margin-top:24px; }
+p { margin:14px 0; }
+ul,ol { padding-left:30px; }
+li { margin:5px 0; }
+blockquote { margin:22px 0; padding:16px 22px; background:var(--quote); border-left:5px solid #0284c7; border-radius:0 10px 10px 0; color:#164e63; }
+blockquote p { margin:4px 0; }
+pre { overflow:auto; background:var(--code); color:#e5e7eb; border-radius:10px; padding:18px 20px; font:14px/1.55 Consolas,'Courier New',monospace; box-shadow:inset 0 0 0 1px rgba(255,255,255,.08); white-space:pre; }
+code { background:#eef2f7; color:#9f1239; border-radius:4px; padding:2px 5px; font: .88em Consolas,'Courier New',monospace; }
+pre code { background:transparent; color:inherit; padding:0; font:inherit; }
+.table-wrap { overflow-x:auto; margin:20px 0; }
+table { border-collapse:collapse; width:100%; min-width:560px; background:#fff; font-size:.94rem; }
+th,td { border:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top; }
+th { background:#eaf2ff; color:#162c56; font-family:system-ui,sans-serif; font-size:.82rem; text-transform:uppercase; letter-spacing:.035em; }
+tr:nth-child(even) td { background:#f8fafc; }
+hr { border:0; border-top:1px solid var(--line); margin:28px 0; }
+.media-placeholder { color:var(--muted); font-style:italic; }
+.section-content > p:first-of-type strong:first-child { color:#0f3f8c; }
+.back-top { display:inline-block; margin-top:18px; font:700 .78rem/1 system-ui,sans-serif; text-transform:uppercase; letter-spacing:.08em; }
+footer { color:var(--muted); text-align:center; font: .85rem/1.5 system-ui,sans-serif; padding-top:40px; }
+@media (max-width:760px) { body { font-size:16px; } .page { padding:14px 12px 50px; } header.hero { padding:32px 24px; border-radius:12px; } nav.toc ol { columns:1; } details.section summary { font-size:1.35rem; padding:15px 17px; } .section-content { padding:0 17px 22px; } .summary-hint { display:none; } pre { font-size:12px; padding:14px; } }
+@media print { body { background:#fff; font-size:11pt; } .page { max-width:none; padding:0; } header.hero { color:#000; background:#fff; box-shadow:none; border:1px solid #aaa; } .hero p,.hero .badge { color:#000; } nav.toc { break-after:page; } details.section { break-inside:auto; box-shadow:none; } details.section[open] .section-content { display:block; } details.section summary:before,.summary-hint,.back-top { display:none; } pre { white-space:pre-wrap; color:#000; background:#f2f2f2; border:1px solid #aaa; } a { color:#000; } }
+</style>
+</head>
+<body>
+<div class="page">
+<header class="hero"><div class="badge">Beginner Project Handbook</div><h1>CareTrack AI (THRIVE)</h1><p>Complete Project Walkthrough &amp; Demo Handbook</p></header>
+<nav class="toc" id="table-of-contents"><h2>Table of Contents</h2><ol><li><a href="#complete-project-walkthrough-demo-handbook">Complete Project Walkthrough &amp; Demo Handbook</a></li><li><a href="#contents">Contents</a></li><li><a href="#what-is-caretrack-ai">What is CareTrack AI?</a></li><li><a href="#what-problem-does-it-solve">What problem does it solve?</a></li><li><a href="#who-uses-it">Who uses it?</a></li><li><a href="#why-is-it-different">Why is it different?</a></li><li><a href="#what-happens-when-a-patient-is-high-risk">What happens when a patient is high risk?</a></li><li><a href="#30-second-explanation">30-second explanation</a></li><li><a href="#1-minute-explanation">1-minute explanation</a></li><li><a href="#3-minute-explanation">3-minute explanation</a></li><li><a href="#5-minute-technical-explanation">5-minute technical explanation</a></li><li><a href="#outpatient-follow-up">Outpatient follow-up</a></li><li><a href="#patient-friction">Patient friction</a></li><li><a href="#why-prioritization-matters">Why prioritization matters</a></li><li><a href="#why-explainability-matters">Why explainability matters</a></li><li><a href="#separate-facts-from-pitch-claims">Separate facts from pitch claims</a></li><li><a href="#predict">Predict</a></li><li><a href="#explain">Explain</a></li><li><a href="#rank">Rank</a></li><li><a href="#intervene">Intervene</a></li><li><a href="#simulate-and-follow-up">Simulate and follow up</a></li><li><a href="#complete-example-priya-patel">Complete example: Priya Patel</a></li><li><a href="#high-level-diagram">High-level diagram</a></li><li><a href="#current-deployment-architecture">Current deployment architecture</a></li><li><a href="#what-happens-when-the-browser-opens-the-site">What happens when the browser opens the site?</a></li><li><a href="#what-happens-when-a-user-logs-in">What happens when a user logs in?</a></li><li><a href="#what-happens-when-the-dashboard-loads">What happens when the dashboard loads?</a></li><li><a href="#what-happens-when-a-patient-is-opened">What happens when a patient is opened?</a></li><li><a href="#what-happens-when-risk-is-calculated">What happens when risk is calculated?</a></li><li><a href="#what-happens-when-the-simulator-is-used">What happens when the simulator is used?</a></li><li><a href="#what-happens-when-a-patient-is-contacted">What happens when a patient is contacted?</a></li><li><a href="#what-happens-when-gemini-is-asked-a-question">What happens when Gemini is asked a question?</a></li><li><a href="#what-happens-when-csv-export-is-used">What happens when CSV export is used?</a></li><li><a href="#root-files">Root files</a></li><li><a href="#src"><code>src/</code></a></li><li><a href="#src-context"><code>src/context/</code></a></li><li><a href="#src-pages"><code>src/pages/</code></a></li><li><a href="#src-components"><code>src/components/</code></a></li><li><a href="#src-services"><code>src/services/</code></a></li><li><a href="#src-db"><code>src/db/</code></a></li><li><a href="#src-data"><code>src/data/</code></a></li><li><a href="#prerequisites">Prerequisites</a></li><li><a href="#install-dependencies">Install dependencies</a></li><li><a href="#create-local-environment-configuration">Create local environment configuration</a></li><li><a href="#development-command">Development command</a></li><li><a href="#production-style-local-build">Production-style local build</a></li><li><a href="#typescript-check">TypeScript check</a></li><li><a href="#local-docker-option">Local Docker option</a></li><li><a href="#first-successful-local-run-checklist">First successful local run checklist</a></li><li><a href="#public-versus-secret-variables">Public versus secret variables</a></li><li><a href="#render-environment-behavior">Render environment behavior</a></li><li><a href="#production-database-requirement">Production database requirement</a></li><li><a href="#login-flow">Login flow</a></li><li><a href="#logout-flow">Logout flow</a></li><li><a href="#roles-in-the-frontend">Roles in the frontend</a></li><li><a href="#roles-in-the-backend">Roles in the backend</a></li><li><a href="#seed-accounts">Seed accounts</a></li><li><a href="#login-screen">Login screen</a></li><li><a href="#main-layout">Main layout</a></li><li><a href="#executive-dashboard">Executive Dashboard</a></li><li><a href="#priority-risk-queue">Priority Risk Queue</a></li><li><a href="#patient-records-directory">Patient Records &amp; Directory</a></li><li><a href="#patient-details">Patient Details</a></li><li><a href="#clinical-risk-analyzer">Clinical Risk Analyzer</a></li><li><a href="#outreach-and-dispatch">Outreach and Dispatch</a></li><li><a href="#analytics">Analytics</a></li><li><a href="#settings">Settings</a></li><li><a href="#global-modals-and-drawer">Global modals and drawer</a></li><li><a href="#default-weights">Default weights</a></li><li><a href="#actual-formulas">Actual formulas</a></li><li><a href="#total-and-tier">Total and tier</a></li><li><a href="#scoring-output">Scoring output</a></li><li><a href="#important-interpretation-rule">Important interpretation rule</a></li><li><a href="#creating-a-patient">Creating a patient</a></li><li><a href="#reading-a-patient-list">Reading a patient list</a></li><li><a href="#updating-a-patient">Updating a patient</a></li><li><a href="#appointment-history">Appointment history</a></li><li><a href="#intervention-history">Intervention history</a></li><li><a href="#notification-history">Notification history</a></li><li><a href="#public-routes">Public routes</a></li><li><a href="#authenticated-routes">Authenticated routes</a></li><li><a href="#admin-protected-route">Admin-protected route</a></li><li><a href="#api-request-example">API request example</a></li><li><a href="#connection-order">Connection order</a></li><li><a href="#tables">Tables</a></li><li><a href="#startup-and-seeding">Startup and seeding</a></li><li><a href="#persistence-warning">Persistence warning</a></li><li><a href="#embedded-postgresql-warning">Embedded PostgreSQL warning</a></li><li><a href="#where-it-lives">Where it lives</a></li><li><a href="#what-gemini-receives">What Gemini receives</a></li><li><a href="#example-questions">Example questions</a></li><li><a href="#fallback-mode">Fallback mode</a></li><li><a href="#what-is-not-implemented">What is not implemented</a></li><li><a href="#demo-steps">Demo steps</a></li><li><a href="#map-component">Map component</a></li><li><a href="#how-to-access-it">How to access it</a></li><li><a href="#how-distance-is-calculated">How distance is calculated</a></li><li><a href="#presentation-guide-discrepancy">Presentation-guide discrepancy</a></li><li><a href="#contact-channels">Contact channels</a></li><li><a href="#actual-provider-behavior">Actual provider behavior</a></li><li><a href="#what-is-recorded">What is recorded?</a></li><li><a href="#demo-steps">Demo steps</a></li><li><a href="#audit-events">Audit events</a></li><li><a href="#audit-screen-access">Audit screen/access</a></li><li><a href="#what-is-not-logged">What is not logged?</a></li><li><a href="#csv-export">CSV export</a></li><li><a href="#claims-to-avoid">Claims to avoid</a></li><li><a href="#0-00-0-30-login">0:00-0:30: Login</a></li><li><a href="#0-30-1-00-dashboard">0:30-1:00: Dashboard</a></li><li><a href="#1-00-1-35-risk-queue">1:00-1:35: Risk Queue</a></li><li><a href="#1-35-2-00-priya-patel-details">1:35-2:00: Priya Patel details</a></li><li><a href="#2-00-2-20-what-if-simulator">2:00-2:20: What-If simulator</a></li><li><a href="#2-20-2-40-contact-workflow">2:20-2:40: Contact workflow</a></li><li><a href="#2-40-3-00-gemini-and-audit">2:40-3:00: Gemini and audit</a></li><li><a href="#slide-1-title-and-vision">Slide 1: Title and vision</a></li><li><a href="#slide-2-problem">Slide 2: Problem</a></li><li><a href="#slide-3-solution">Slide 3: Solution</a></li><li><a href="#slide-4-scoring-engine">Slide 4: Scoring engine</a></li><li><a href="#slide-5-hero-patient">Slide 5: Hero patient</a></li><li><a href="#slide-6-gis">Slide 6: GIS</a></li><li><a href="#slide-7-gemini">Slide 7: Gemini</a></li><li><a href="#slide-8-architecture">Slide 8: Architecture</a></li><li><a href="#slide-9-roles-and-governance">Slide 9: Roles and governance</a></li><li><a href="#slide-10-impact">Slide 10: Impact</a></li><li><a href="#slide-11-differentiation">Slide 11: Differentiation</a></li><li><a href="#slide-12-roadmap">Slide 12: Roadmap</a></li><li><a href="#render-blueprint">Render Blueprint</a></li><li><a href="#deployment-steps">Deployment steps</a></li><li><a href="#expected-production-startup">Expected production startup</a></li><li><a href="#production-checks">Production checks</a></li><li><a href="#docker-deployment">Docker deployment</a></li><li><a href="#before-changing-anything">Before changing anything</a></li><li><a href="#common-change-locations">Common change locations</a></li><li><a href="#do-not-make-these-assumptions">Do not make these assumptions</a></li><li><a href="#safe-feature-change-pattern">Safe feature change pattern</a></li><li><a href="#npm-start-says-package-json-is-missing"><code>npm start</code> says package.json is missing</a></li><li><a href="#port-3000-is-already-in-use">Port 3000 is already in use</a></li><li><a href="#embedded-postgresql-startup-is-slow">Embedded PostgreSQL startup is slow</a></li><li><a href="#pgdata-is-not-empty-database-restarts-strangely"><code>.pgdata</code> is not empty / database restarts strangely</a></li><li><a href="#production-says-database-url-must-be-configured">Production says <code>DATABASE_URL must be configured</code></a></li><li><a href="#postgresql-connection-fails">PostgreSQL connection fails</a></li><li><a href="#login-fails">Login fails</a></li><li><a href="#dashboard-is-blank-or-shows-fallback-values">Dashboard is blank or shows fallback values</a></li><li><a href="#gemini-assistant-shows-fallback-text">Gemini assistant shows fallback text</a></li><li><a href="#twilio-says-demo-mode">Twilio says demo mode</a></li><li><a href="#map-search-does-not-return-results">Map search does not return results</a></li><li><a href="#typescript-errors-after-a-change">TypeScript errors after a change</a></li><li><a href="#render-health-check-fails">Render health check fails</a></li><li><a href="#why-deterministic-scoring-instead-of-deep-learning">Why deterministic scoring instead of deep learning?</a></li><li><a href="#does-the-score-predict-readmission">Does the score predict readmission?</a></li><li><a href="#what-happens-if-postgresql-is-unavailable">What happens if PostgreSQL is unavailable?</a></li><li><a href="#is-the-data-real">Is the data real?</a></li><li><a href="#is-the-system-hipaa-or-dpdpa-compliant">Is the system HIPAA or DPDPA compliant?</a></li><li><a href="#is-gemini-making-the-risk-decision">Is Gemini making the risk decision?</a></li><li><a href="#what-if-gemini-is-unavailable">What if Gemini is unavailable?</a></li><li><a href="#is-telehealth-integrated">Is telehealth integrated?</a></li><li><a href="#is-twilio-fully-integrated">Is Twilio fully integrated?</a></li><li><a href="#is-the-map-a-routing-system">Is the map a routing system?</a></li><li><a href="#what-does-render-deploy">What does Render deploy?</a></li><li><a href="#what-is-the-strongest-demo-point">What is the strongest demo point?</a></li><li><a href="#what-is-still-roadmap">What is still roadmap?</a></li><li><a href="#before-a-demo">Before a demo</a></li><li><a href="#before-changing-code">Before changing code</a></li><li><a href="#before-deploying-render">Before deploying Render</a></li><li><a href="#one-sentence-project-summary">One-sentence project summary</a></li></ol></nav>
+<main><h1 id="caretrack-ai-thrive">CareTrack AI (THRIVE)</h1>
+<details class="section level-2" id="complete-project-walkthrough-demo-handbook" open><summary><span>Complete Project Walkthrough &amp; Demo Handbook</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>This handbook explains the CareTrack AI project as it exists in the repository. It is written for a teammate who is new to the codebase and may be new to software development.</p>
+<p>The code is the source of truth. The supplied presentation guide is useful for the story and demo order, but some presentation claims are aspirational or outdated. Those differences are called out explicitly in this document.</p>
+<blockquote><p><strong>Current deployment truth:</strong> the project is a Vite + React frontend served by an Express/Node server and deployed as a Render web service with PostgreSQL. It is not currently a Vercel serverless project.</p></blockquote>
+<hr>
+</div></details>
+<details class="section level-2" id="contents" open><summary><span>Contents</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<ol>
+<li><a href="#1-executive-summary">Executive Summary</a></li>
+<li><a href="#2-the-problem-we-are-solving">The Problem</a></li>
+<li><a href="#3-the-core-idea">The Core Idea</a></li>
+<li><a href="#4-complete-system-architecture">Complete System Architecture</a></li>
+<li><a href="#5-project-folder-structure">Project Folder Structure</a></li>
+<li><a href="#6-how-to-run-the-project-locally">How to Run Locally</a></li>
+<li><a href="#7-environment-variables">Environment Variables</a></li>
+<li><a href="#8-authentication-and-roles">Authentication and Roles</a></li>
+<li><a href="#9-frontend-walkthrough">Frontend Walkthrough</a></li>
+<li><a href="#10-risk-scoring-engine">Risk Scoring Engine</a></li>
+<li><a href="#11-patient-data-flow">Patient Data Flow</a></li>
+<li><a href="#12-backend-api-reference">Backend API Reference</a></li>
+<li><a href="#13-database-architecture">Database Architecture</a></li>
+<li><a href="#14-gemini-clinical-operations-assistant">Gemini Assistant</a></li>
+<li><a href="#15-gis-and-map-features">GIS and Map Features</a></li>
+<li><a href="#16-communication-and-twilio">Communication and Twilio</a></li>
+<li><a href="#17-audit-logging-and-csv-export">Audit Logging and CSV Export</a></li>
+<li><a href="#18-presentation-claims-compared-with-code">Presentation Claims Compared with Code</a></li>
+<li><a href="#19-three-minute-demo-script">Three-Minute Demo Script</a></li>
+<li><a href="#20-longer-presentation-scripts">Longer Presentation Scripts</a></li>
+<li><a href="#21-production-deployment">Production Deployment</a></li>
+<li><a href="#22-safe-modification-guide">Safe Modification Guide</a></li>
+<li><a href="#23-troubleshooting">Troubleshooting</a></li>
+<li><a href="#24-judge-qa">Judge Q&amp;A</a></li>
+<li><a href="#25-final-beginner-checklist">Final Beginner Checklist</a></li>
+</ol>
+<hr>
+<h1 id="1-executive-summary">1. Executive Summary</h1>
+</div></details>
+<details class="section level-2" id="what-is-caretrack-ai" open><summary><span>What is CareTrack AI?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>CareTrack AI is a hospital operations application for identifying outpatients who may miss important follow-up appointments.</p>
+<p>It combines:</p>
+<ul>
+<li>A React dashboard for hospital staff.</li>
+<li>An Express API for authentication, patient records, risk calculations, interventions, and analytics.</li>
+<li>A deterministic scoring engine that converts patient and appointment facts into a 0-100 follow-up risk score.</li>
+<li>PostgreSQL persistence for staff, patients, appointments, predictions, interventions, notifications, audit records, and scoring configuration.</li>
+<li>Optional Gemini assistance for operational questions.</li>
+<li>Optional live Twilio SMS delivery, with a built-in demo mode when Twilio is not configured.</li>
+<li>A Leaflet/OpenStreetMap map picker for patient address and distance entry.</li>
+</ul>
+<p>The product is a decision-support and coordination tool. It does not diagnose illness, prescribe medicine, or replace a clinician.</p>
+</div></details>
+<details class="section level-2" id="what-problem-does-it-solve" open><summary><span>What problem does it solve?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>A normal reminder system treats every patient the same. CareTrack AI attempts to answer four operational questions:</p>
+<ol>
+<li>Which patients are most likely to miss follow-up?</li>
+<li>Why does the system think they are at risk?</li>
+<li>Which patients should staff contact first?</li>
+<li>What action can staff record or simulate to reduce the practical barrier?</li>
+</ol>
+<p>The application focuses on barriers represented in the project data:</p>
+<ul>
+<li>Missed appointment history.</li>
+<li>Distance from the hospital.</li>
+<li>Historical attendance rate.</li>
+<li>Long appointment intervals.</li>
+<li>Long treatment duration.</li>
+<li>Age-related mobility or dependency signals.</li>
+</ul>
+</div></details>
+<details class="section level-2" id="who-uses-it" open><summary><span>Who uses it?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The seed data includes five staff roles:</p>
+<div class="table-wrap"><table><thead><tr><th>Role</th><th>Example account</th><th>Intended use in the UI</th></tr></thead><tbody><tr><td><code>DOCTOR</code></td><td><code>doctor@caretrack.in</code></td><td>Review risk, patients, and clinical follow-up context</td></tr><tr><td><code>NURSE</code></td><td><code>nurse@caretrack.in</code></td><td>Work the outreach and intervention queue</td></tr><tr><td><code>COORDINATOR</code></td><td><code>coordinator@caretrack.in</code></td><td>Coordinate follow-up contact, transport, and teleconsultation offers</td></tr><tr><td><code>CARE_MANAGER</code></td><td><code>caremanager@caretrack.in</code></td><td>Review clinic-wide trends and adherence operations</td></tr><tr><td><code>ADMIN</code></td><td><code>admin@caretrack.in</code></td><td>Use settings, staff management, scoring configuration, and demo controls</td></tr></tbody></table></div>
+<p>The default seed password for the demo accounts is <code>password123</code>. These credentials are for demonstration only and must not be used in a real hospital deployment.</p>
+</div></details>
+<details class="section level-2" id="why-is-it-different" open><summary><span>Why is it different?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The intended difference is not that it predicts with a black-box machine-learning model. The current implementation uses explicit formulas and displays the contributing factors. That makes the score easy to inspect and explain during a demo.</p>
+<p>The closed-loop concept is:</p>
+<pre><code class="language-text">Predict -&gt; Explain -&gt; Rank -&gt; Intervene -&gt; Record outcome</code></pre>
+<p>The project also includes a hypothetical simulator. A coordinator can change values such as distance or missed appointments and immediately see how the score would change. The simulation itself does not change the database until a separate action is submitted.</p>
+</div></details>
+<details class="section level-2" id="what-happens-when-a-patient-is-high-risk" open><summary><span>What happens when a patient is high risk?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The backend calculates a risk tier and recommended actions. The UI can then:</p>
+<ol>
+<li>Show the patient in the Priority Risk Queue.</li>
+<li>Open the patient's details and factor explanation.</li>
+<li>Open the What-If simulator.</li>
+<li>Open the action recommendation modal.</li>
+<li>Record an intervention.</li>
+<li>Contact the patient through phone-call, SMS, or WhatsApp workflow.</li>
+<li>Update the intervention status later.</li>
+<li>Include the action in analytics and audit history.</li>
+</ol>
+<p>Some actions are simulated. In particular, phone calls and WhatsApp messages are not connected to a live provider in the current implementation.</p>
+</div></details>
+<details class="section level-2" id="30-second-explanation" open><summary><span>30-second explanation</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<blockquote><p>CareTrack AI helps hospital staff find outpatient follow-up patients who may miss their next visit. It calculates an explainable 0-100 score from missed visits, travel distance, attendance, appointment cadence, treatment duration, and age. Staff can inspect the reason, prioritize the queue, simulate a solution such as teleconsultation, and record outreach. PostgreSQL stores the operational history, while Gemini is an optional assistant for operational questions.</p></blockquote>
+</div></details>
+<details class="section level-2" id="1-minute-explanation" open><summary><span>1-minute explanation</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<blockquote><p>Hospitals lose capacity when follow-up appointments are missed, but a generic reminder does not explain who needs personal help. CareTrack AI turns patient and appointment information into a transparent risk score. The dashboard ranks high-risk patients, and each score is broken into named factors such as missed appointments and travel distance. Staff can open a patient, see the appointment timeline, test a hypothetical telehealth option, send or simulate outreach, and record the result. The application is a React frontend backed by Express and PostgreSQL. Gemini can summarize operational risk questions, but the deterministic engine remains the source of the score.</p></blockquote>
+</div></details>
+<details class="section level-2" id="3-minute-explanation" open><summary><span>3-minute explanation</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<blockquote><p>The application begins with staff authentication. After login, the dashboard loads a cohort summary, top high-risk patients, risk distribution, and operational trends. The Risk Queue supports search, risk filters, intervention filters, due-date filters, sorting, pagination, and CSV export. Opening a patient loads demographics, appointments, interventions, and a current risk analysis. The scoring engine uses six bounded factors whose configured maximums add to 100. For example, the canonical Priya Patel record has 5 missed appointments, a 42 km distance, 58% attendance, a 60-day cadence, and a 12-month treatment duration. The current formula produces 83 and classifies her as CRITICAL. The What-If simulator can set distance to zero to represent teleconsultation and shows 64, a 19-point hypothetical reduction. Staff can then open the contact modal, select an outreach channel, and save the attempt. PostgreSQL stores the resulting intervention, notification, and audit records.</p></blockquote>
+</div></details>
+<details class="section level-2" id="5-minute-technical-explanation" open><summary><span>5-minute technical explanation</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<blockquote><p>CareTrack AI is a single full-stack TypeScript application. Vite builds the React client into <code>dist</code>; esbuild bundles <code>server.ts</code> into <code>dist-server/server.cjs</code>; Express serves both the API and the built client in production. The frontend uses <code>AppContext</code> for in-memory UI state and <code>AuthContext</code> for the current user and token. <code>src/services/api.ts</code> maps UI actions to relative <code>/api</code> calls. Express applies JSON parsing, CORS headers, database initialization middleware, JWT authentication, and route handlers. <code>src/db/db.ts</code> first attempts <code>DATABASE<em>URL</code>, then local PostgreSQL, then embedded PostgreSQL for local development, and finally an in-memory fallback if permitted. On Render, <code>render.yaml</code> creates the web service and PostgreSQL database and supplies <code>DATABASE</em>URL</code>. The scoring engine is deterministic and returns factor contributions, reasons, protective factors, recommended actions, and a tier. Gemini is lazily initialized only when <code>GEMINI<em>API</em>KEY</code> exists and uses the current <code>gemini-3.6-flash</code> model through <code>@google/genai</code>. Twilio SMS is optional and falls back to a recorded demo result. The current code is suitable for a hackathon or controlled demo, but security and authorization hardening would be required before handling real protected health information.</p></blockquote>
+<hr>
+<h1 id="2-the-problem-we-are-solving">2. The Problem We Are Solving</h1>
+</div></details>
+<details class="section level-2" id="outpatient-follow-up" open><summary><span>Outpatient follow-up</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Many treatments require repeated visits after an initial appointment, procedure, or diagnosis. A missed follow-up can delay review, rehabilitation, medication checks, diagnostic testing, or care coordination.</p>
+<p>CareTrack AI models the operational side of that problem. It does not claim to determine medical outcomes. It asks whether the patient appears difficult to keep engaged with the next scheduled follow-up.</p>
+</div></details>
+<details class="section level-2" id="patient-friction" open><summary><span>Patient friction</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The project represents friction using data fields such as:</p>
+<ul>
+<li><code>missedAppointments</code>.</li>
+<li><code>distanceKm</code>.</li>
+<li><code>attendanceRate</code>.</li>
+<li><code>appointmentFrequencyDays</code>.</li>
+<li><code>treatmentDurationMonths</code>.</li>
+<li><code>age</code>.</li>
+<li><code>transportAccess</code>.</li>
+<li><code>preferredLanguage</code>.</li>
+</ul>
+<p>These values are used for scoring, display, or outreach context. They are not all clinical measurements.</p>
+</div></details>
+<details class="section level-2" id="why-prioritization-matters" open><summary><span>Why prioritization matters</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>A clinic team cannot make a personal phone call to every patient at the same time. A ranked queue gives staff a starting point. In this application, the sort order is based on the calculated <code>currentRisk.score</code>, with filters for risk level, intervention status, and due-date windows.</p>
+</div></details>
+<details class="section level-2" id="why-explainability-matters" open><summary><span>Why explainability matters</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>A score such as <code>83</code> is not useful by itself. The application returns:</p>
+<ul>
+<li>A risk level.</li>
+<li>The individual factor contributions.</li>
+<li>Human-readable reasons.</li>
+<li>Protective factors.</li>
+<li>Recommended actions.</li>
+<li>An immediate action, secondary action, and alternative action.</li>
+<li>A natural-language summary.</li>
+</ul>
+<p>This is why the product story uses “explainable” rather than simply “predictive.”</p>
+</div></details>
+<details class="section level-2" id="separate-facts-from-pitch-claims" open><summary><span>Separate facts from pitch claims</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The presentation guide includes statistics such as 25%-30% no-show rates, 3x readmission risk, $150B annual loss, ROI percentages, and recovered capacity. Those figures are not calculated or sourced by this repository. Present them only as external context if you have independently verified sources. Do not describe them as measured results from this codebase.</p>
+<p>The current repository does not contain:</p>
+<ul>
+<li>A hospital production dataset.</li>
+<li>A validated clinical outcomes study.</li>
+<li>A financial ROI model.</li>
+<li>A readmission prediction model.</li>
+<li>A causal analysis showing that interventions reduce readmissions.</li>
+</ul>
+<p>Use the phrase “operational decision support prototype” when accuracy matters.</p>
+<hr>
+<h1 id="3-the-core-idea">3. The Core Idea</h1>
+</div></details>
+<details class="section level-2" id="predict" open><summary><span>Predict</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The scoring engine receives a patient-like object and computes six factor scores. It caps the final total between 0 and 100.</p>
+<p>The main implementation is:</p>
+<ul>
+<li><code>src/services/scoringEngine.ts</code></li>
+<li><code>calculatePatientRisk(...)</code></li>
+<li><code>DEFAULT<em>SCORING</em>CONFIG</code></li>
+</ul>
+<p>The server calls the engine for patient detail views, prediction requests, analyzer requests, patient creation/update, seeded records, and dashboard calculations.</p>
+</div></details>
+<details class="section level-2" id="explain" open><summary><span>Explain</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The result includes <code>topFactors</code>, <code>reasons</code>, <code>protectiveFactors</code>, and recommended actions. The UI renders those values in <code>RiskCard</code>, <code>RiskExplanationModal</code>, <code>RiskGauge</code>, <code>PatientDetailsPage</code>, and <code>AnalyzerFindingsModal</code>.</p>
+</div></details>
+<details class="section level-2" id="rank" open><summary><span>Rank</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The Risk Queue calls:</p>
+<pre><code class="language-text">GET /api/patients</code></pre>
+<p>with parameters such as:</p>
+<pre><code class="language-text">riskLevel=HIGH
+interventionStatus=ALL
+dueFilter=NEXT_7_DAYS
+sortBy=riskScore
+sortOrder=desc
+page=1
+limit=15</code></pre>
+<p>The backend applies filtering, sorting, and pagination in <code>dbGetPatients(...)</code>.</p>
+</div></details>
+<details class="section level-2" id="intervene" open><summary><span>Intervene</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>There are two related workflows:</p>
+<ol>
+<li><strong>Intervention record:</strong> create or update a clinical outreach record.</li>
+<li><strong>Patient contact:</strong> submit a phone/SMS/WhatsApp contact attempt and create a notification plus intervention record.</li>
+</ol>
+<p>The relevant UI components are:</p>
+<ul>
+<li><code>InterventionModal.tsx</code>.</li>
+<li><code>ContactPatientModal.tsx</code>.</li>
+<li><code>WhatShouldIDoModal.tsx</code>.</li>
+<li><code>AnalyzerFindingsModal.tsx</code>.</li>
+</ul>
+</div></details>
+<details class="section level-2" id="simulate-and-follow-up" open><summary><span>Simulate and follow up</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p><code>RiskSimulator.tsx</code> is a client-side hypothetical calculator. It starts with the current patient values, exposes sliders, and can set effective distance to <code>0 km</code> when “Simulate Telehealth” is active. It does not call the backend while the slider moves and does not save the simulated values automatically.</p>
+</div></details>
+<details class="section level-2" id="complete-example-priya-patel" open><summary><span>Complete example: Priya Patel</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The canonical seed record is:</p>
+<div class="table-wrap"><table><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody><tr><td>Internal id</td><td><code>PAT-1042</code></td></tr><tr><td>Patient code</td><td><code>P-1042</code></td></tr><tr><td>Name</td><td>Priya Patel</td></tr><tr><td>Age</td><td>46</td></tr><tr><td>Condition</td><td>Post-CABG Cardiac Rehabilitation &amp; Hypertension</td></tr><tr><td>Distance</td><td>42 km</td></tr><tr><td>Appointments</td><td>12 total, 7 attended, 5 missed</td></tr><tr><td>Attendance</td><td>58%</td></tr><tr><td>Cadence</td><td>Every 60 days</td></tr><tr><td>Treatment duration</td><td>12 months</td></tr><tr><td>Transport</td><td>Requires Assistance</td></tr><tr><td>Language</td><td>Gujarati</td></tr></tbody></table></div>
+<p>Using the default scoring configuration:</p>
+<pre><code class="language-text">Missed visits:   35
+Distance:        19
+Attendance:      17
+Cadence:          7
+Duration:         5
+Age:              0
+                 --
+Total:           83 -&gt; CRITICAL</code></pre>
+<p>The simulator sets effective distance to zero for the telehealth scenario:</p>
+<pre><code class="language-text">83 original - 19 distance points = 64 simulated -&gt; HIGH</code></pre>
+<p>This is a hypothetical risk recalculation, not proof that a telehealth appointment will occur or that a clinical outcome will improve.</p>
+<hr>
+<h1 id="4-complete-system-architecture">4. Complete System Architecture</h1>
+</div></details>
+<details class="section level-2" id="high-level-diagram" open><summary><span>High-level diagram</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<pre><code class="language-text">+------------------------------+
+| Browser                      |
+| React 19 + Vite client       |
+| AppContext + AuthContext     |
++--------------+---------------+
+               |
+               | relative /api requests
+               v
++------------------------------+
+| Express server               |
+| server.ts                    |
+| auth, routes, static client  |
++--------------+---------------+
+               |
+       +-------+--------+
+       |                |
+       v                v
++-------------+  +------------------+
+| Scoring     |  | External services|
+| scoringEngine|  | Gemini, Twilio,  |
+|             |  | Nominatim/OSM   |
++------+------+  +------------------+
+       |
+       v
++------------------------------+
+| PostgreSQL                   |
+| users, patients, appointments|
+| predictions, interventions   |
+| notifications, audit_logs    |
+| scoring_configs              |
++------------------------------+</code></pre>
+</div></details>
+<details class="section level-2" id="current-deployment-architecture" open><summary><span>Current deployment architecture</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Render runs one long-lived Node web service:</p>
+<pre><code class="language-text">Render web service
+  -&gt; npm ci &amp;&amp; npm run build
+  -&gt; npm start
+  -&gt; node dist-server/server.cjs
+  -&gt; Express listens on 0.0.0.0:$PORT
+  -&gt; Express serves dist/index.html and /api/*
+  -&gt; Render PostgreSQL is exposed through DATABASE_URL</code></pre>
+<p>The deployment definition is <code>render.yaml</code>. It creates:</p>
+<ul>
+<li>A web service named <code>caretrack-ai</code>.</li>
+<li>A PostgreSQL database named <code>caretrack-db</code>.</li>
+<li>A generated <code>JWT_SECRET</code>.</li>
+<li><code>NODE_ENV=production</code>.</li>
+<li><code>PG<em>MAX</em>CONNECTIONS=5</code>.</li>
+<li>A health check at <code>/api/health</code>.</li>
+</ul>
+</div></details>
+<details class="section level-2" id="what-happens-when-the-browser-opens-the-site" open><summary><span>What happens when the browser opens the site?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<ol>
+<li>The browser requests <code>/</code>.</li>
+<li>Express serves <code>dist/index.html</code> in production.</li>
+<li>The built JavaScript bundle loads.</li>
+<li><code>src/main.tsx</code> renders <code>App</code>.</li>
+<li><code>AuthProvider</code> checks <code>localStorage</code> for <code>caretrack<em>user</code> and <code>caretrack</em>token</code>.</li>
+<li>If both exist, the application restores the session locally.</li>
+<li>If not, <code>AuthGate</code> shows <code>LoginPage</code>.</li>
+<li>There is no React Router. The visible page is selected using <code>currentPage</code> state in <code>AppContext</code>.</li>
+</ol>
+</div></details>
+<details class="section level-2" id="what-happens-when-a-user-logs-in" open><summary><span>What happens when a user logs in?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<ol>
+<li>The user enters an email and password in <code>LoginPage</code>.</li>
+<li><code>AuthContext.login(...)</code> calls <code>api.login(...)</code>.</li>
+<li><code>src/services/api.ts</code> sends <code>POST /api/auth/login</code>.</li>
+<li><code>server.ts</code> normalizes the email and loads the user with <code>dbGetUserByEmail(...)</code>.</li>
+<li>Seed/demo passwords and bcrypt hashes are supported.</li>
+<li>The server signs a JWT using <code>JWT_SECRET</code>, or the demo fallback secret when not configured outside production.</li>
+<li>The response contains <code>success</code>, <code>token</code>, and a safe user object without <code>passwordHash</code>.</li>
+<li>The browser stores the token and user in <code>localStorage</code>.</li>
+<li><code>AuthGate</code> switches from <code>LoginPage</code> to <code>MainLayout</code>.</li>
+<li><code>AppContext</code> calls <code>refreshDashboard(...)</code>.</li>
+</ol>
+</div></details>
+<details class="section level-2" id="what-happens-when-the-dashboard-loads" open><summary><span>What happens when the dashboard loads?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<ol>
+<li><code>DashboardPage</code> asks <code>AppContext</code> for the shared summary.</li>
+<li><code>AppContext.refreshDashboard()</code> calls:</li>
+</ol>
+<ul>
+<li><code>GET /api/dashboard/summary</code>.</li>
+<li><code>GET /api/settings/config</code>.</li>
+</ul>
+<ol>
+<li><code>DashboardPage</code> separately calls:</li>
+</ol>
+<ul>
+<li><code>GET /api/patients?riskLevel=HIGH&amp;limit=5&amp;sortBy=riskScore&amp;sortOrder=desc</code>.</li>
+<li><code>GET /api/dashboard/trends</code>.</li>
+</ul>
+<ol>
+<li>The backend initializes the database once for the process.</li>
+<li>PostgreSQL queries or the permitted local fallback store return data.</li>
+<li>React renders KPI cards, top-risk patients, charts, and navigation actions.</li>
+</ol>
+<p>Some dashboard fallback numbers exist in the UI if data is not available. They are presentation defaults, not authoritative database measurements.</p>
+</div></details>
+<details class="section level-2" id="what-happens-when-a-patient-is-opened" open><summary><span>What happens when a patient is opened?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<ol>
+<li>A page calls <code>viewPatientDetails(patientId)</code>.</li>
+<li><code>AppContext</code> stores the selected internal patient id and changes <code>currentPage</code> to <code>patient-details</code>.</li>
+<li><code>PatientDetailsPage</code> calls <code>GET /api/patients/:id</code>.</li>
+<li>The backend loads the patient, appointments, interventions, and scoring configuration.</li>
+<li>It recalculates current risk with <code>calculatePatientRisk(...)</code>.</li>
+<li>The response contains <code>patient</code>, <code>appointments</code>, <code>interventions</code>, and <code>riskAnalysis</code>.</li>
+<li>The UI displays the patient profile, risk gauge, factor details, timeline, actions, simulator, and report controls.</li>
+</ol>
+</div></details>
+<details class="section level-2" id="what-happens-when-risk-is-calculated" open><summary><span>What happens when risk is calculated?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>There are three important server paths:</p>
+<ul>
+<li><code>POST /api/predictions/predict</code>: direct prediction input.</li>
+<li><code>GET /api/patients/:id/risk</code>: risk for a stored patient.</li>
+<li><code>POST /api/analyzer/process</code>: analyzer response with findings and a recommended intervention.</li>
+</ul>
+<p>The prediction calculation itself is deterministic. The prediction id contains randomness, but the score for identical inputs and configuration is stable.</p>
+</div></details>
+<details class="section level-2" id="what-happens-when-the-simulator-is-used" open><summary><span>What happens when the simulator is used?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<ol>
+<li><code>PatientDetailsPage</code> renders <code>RiskSimulator</code>.</li>
+<li>The component copies patient values into React state.</li>
+<li>Slider changes recalculate locally through <code>calculatePatientRisk(...)</code> imported from <code>scoringEngine.ts</code>.</li>
+<li>The score difference is displayed beside the original score.</li>
+<li>“Simulate Telehealth” sets effective distance to zero.</li>
+<li>No database write occurs until the user starts a separate real workflow.</li>
+</ol>
+</div></details>
+<details class="section level-2" id="what-happens-when-a-patient-is-contacted" open><summary><span>What happens when a patient is contacted?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<ol>
+<li>The user opens <code>ContactPatientModal</code> from the dashboard, queue, directory, or patient detail view.</li>
+<li>The user chooses <code>PHONE_CALL</code>, <code>SMS</code>, or <code>WHATSAPP</code> and enters/accepts contact details.</li>
+<li><code>api.contactPatient(...)</code> sends <code>POST /api/patients/:id/contact</code>.</li>
+<li>The backend loads the patient and builds a message draft or uses the submitted content.</li>
+<li><code>sendNotification(...)</code> chooses live SMS or demo behavior.</li>
+<li><code>dbCreateNotification(...)</code> stores the notification record.</li>
+<li><code>dbCreateIntervention(...)</code> stores the associated intervention.</li>
+<li><code>dbLogAudit(...)</code> records the operational action.</li>
+<li>The UI displays a toast and refreshes relevant data.</li>
+</ol>
+</div></details>
+<details class="section level-2" id="what-happens-when-gemini-is-asked-a-question" open><summary><span>What happens when Gemini is asked a question?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<ol>
+<li><code>AiAssistantDrawer</code> displays a chat drawer.</li>
+<li>The user sends a message.</li>
+<li><code>api.askAssistant(...)</code> posts to <code>/api/assistant/chat</code>.</li>
+<li>The backend loads dashboard and patient context.</li>
+<li>If <code>GEMINI<em>API</em>KEY</code> is present, <code>getGeminiClient()</code> creates a lazy <code>GoogleGenAI</code> client.</li>
+<li><code>ai.models.generateContent(...)</code> is called with model <code>gemini-3.6-flash</code>.</li>
+<li>The prompt includes strict operational-only instructions.</li>
+<li>If Gemini is unavailable or errors, the server creates a deterministic keyword-based fallback response.</li>
+<li>The UI displays the returned reply.</li>
+</ol>
+</div></details>
+<details class="section level-2" id="what-happens-when-csv-export-is-used" open><summary><span>What happens when CSV export is used?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<ol>
+<li><code>RiskQueuePage</code> calls <code>api.exportCsv()</code>.</li>
+<li>The browser requests <code>GET /api/export/csv</code> with the JWT.</li>
+<li>The backend loads up to 1,000 patients, sorted by risk.</li>
+<li>It constructs CSV headers and rows.</li>
+<li>It responds with <code>text/csv</code> and a download filename.</li>
+<li>The browser creates a Blob download.</li>
+</ol>
+<p>The exporter quotes selected text fields but is not a full RFC-compliant CSV escaping library. Treat it as a demo/export utility, not a compliance-grade export without further hardening.</p>
+<hr>
+<h1 id="5-project-folder-structure">5. Project Folder Structure</h1>
+<p>The relevant repository tree is:</p>
+<pre><code class="language-text">NextEra---ASA-Trinity/
+├── .env.example
+├── .gitignore
+├── Dockerfile
+├── README.md
+├── docker-compose.yml
+├── index.html
+├── metadata.json
+├── package.json
+├── package-lock.json
+├── render.yaml
+├── server.ts
+├── tsconfig.json
+├── vite.config.ts
+├── src/
+│   ├── App.tsx
+│   ├── index.css
+│   ├── main.tsx
+│   ├── types.ts
+│   ├── components/
+│   ├── context/
+│   ├── data/
+│   ├── db/
+│   ├── pages/
+│   └── services/
+└── docs/
+    └── CARETRACK_AI_COMPLETE_WALKTHROUGH.md</code></pre>
+<p>The old <code>api/</code> directory may remain as an empty local directory after the Vercel migration. It is not part of the current active deployment path. There are no active API wrapper files under it.</p>
+</div></details>
+<details class="section level-2" id="root-files" open><summary><span>Root files</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<h3 id="package-json"><code>package.json</code></h3>
+<p>Defines project metadata, scripts, runtime dependencies, and development dependencies.</p>
+<p>Important scripts:</p>
+<div class="table-wrap"><table><thead><tr><th>Script</th><th>Meaning</th></tr></thead><tbody><tr><td><code>npm run dev</code></td><td>Runs <code>tsx server.ts</code> for local development</td></tr><tr><td><code>npm run build:client</code></td><td>Builds the React/Vite client into <code>dist</code></td></tr><tr><td><code>npm run build:server</code></td><td>Bundles <code>server.ts</code> into <code>dist-server/server.cjs</code></td></tr><tr><td><code>npm run build</code></td><td>Runs the client and server builds</td></tr><tr><td><code>npm start</code></td><td>Runs the compiled production server</td></tr><tr><td><code>npm run clean</code></td><td>Deletes <code>dist</code> and <code>dist-server</code></td></tr><tr><td><code>npm run lint</code></td><td>Runs <code>tsc --noEmit</code>; this is a TypeScript check, not ESLint</td></tr></tbody></table></div>
+<p>Do not casually remove dependencies from this file. The frontend and backend share one dependency graph.</p>
+<h3 id="package-lock-json"><code>package-lock.json</code></h3>
+<p>Locks npm dependency versions. Use <code>npm ci</code> in deployment and clean CI environments.</p>
+<h3 id="server-ts"><code>server.ts</code></h3>
+<p>This is the main backend entry point and the production server entry point. It contains:</p>
+<ul>
+<li>Express app creation.</li>
+<li>JSON body parsing.</li>
+<li>CORS headers.</li>
+<li>Database initialization middleware.</li>
+<li>JWT authentication middleware.</li>
+<li>Role-checking middleware.</li>
+<li>All REST endpoints.</li>
+<li>Gemini integration.</li>
+<li>Static client serving.</li>
+<li>Vite middleware for local development.</li>
+<li>The <code>startServer()</code> function.</li>
+</ul>
+<p>This is the most sensitive file in the project. A route change can affect authentication, database writes, UI workflows, and production deployment.</p>
+<h3 id="render-yaml"><code>render.yaml</code></h3>
+<p>Defines the current Render Blueprint:</p>
+<ul>
+<li>Node web service.</li>
+<li><code>npm ci &amp;&amp; npm run build</code> build command.</li>
+<li><code>npm start</code> start command.</li>
+<li><code>/api/health</code> health check.</li>
+<li>Managed PostgreSQL database.</li>
+<li>Render-generated <code>JWT_SECRET</code>.</li>
+</ul>
+<h3 id="dockerfile"><code>Dockerfile</code></h3>
+<p>Builds a Node 22 Alpine production image. It builds both the client and server and starts <code>dist-server/server.cjs</code>.</p>
+<h3 id="docker-compose-yml"><code>docker-compose.yml</code></h3>
+<p>Runs a local Docker PostgreSQL 16 container and a production-style app container. It is useful for local/container testing and is separate from Render deployment.</p>
+<h3 id="vite-config-ts"><code>vite.config.ts</code></h3>
+<p>Configures Vite, React, Tailwind, and the <code>@</code> path alias. The alias maps to the repository root.</p>
+<h3 id="tsconfig-json"><code>tsconfig.json</code></h3>
+<p>Configures TypeScript with:</p>
+<ul>
+<li>ES2022 target.</li>
+<li>DOM libraries.</li>
+<li>Bundler module resolution.</li>
+<li>React JSX transform.</li>
+<li><code>@/*</code> path aliases.</li>
+<li>No emitted TypeScript files.</li>
+</ul>
+<h3 id="index-html"><code>index.html</code></h3>
+<p>The Vite HTML entry document. It contains the root element and loads <code>/src/main.tsx</code> during development/build processing.</p>
+<h3 id="env-example"><code>.env.example</code></h3>
+<p>Lists environment variable names only. It must not contain real secrets.</p>
+<h3 id="gitignore"><code>.gitignore</code></h3>
+<p>Ignores <code>node_modules</code>, build outputs, <code>.env</code> files, <code>.pgdata</code>, coverage, and similar generated artifacts.</p>
+</div></details>
+<details class="section level-2" id="src" open><summary><span><code>src/</code></span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<h3 id="src-main-tsx"><code>src/main.tsx</code></h3>
+<p>Creates the React root and renders <code>&lt;App /&gt;</code>.</p>
+<h3 id="src-app-tsx"><code>src/App.tsx</code></h3>
+<p>Creates the provider tree and authenticated layout:</p>
+<pre><code class="language-text">AuthProvider
+  -&gt; AppProvider
+      -&gt; AuthGate
+          -&gt; LoginPage OR MainLayout</code></pre>
+<p><code>MainLayout</code> mounts the navbar, sidebar, active page, global modals, AI drawer, and toast container.</p>
+<h3 id="src-types-ts"><code>src/types.ts</code></h3>
+<p>Contains shared TypeScript contracts, including:</p>
+<ul>
+<li><code>Patient</code>.</li>
+<li><code>StaffUser</code>.</li>
+<li><code>Appointment</code>.</li>
+<li><code>RiskPrediction</code>.</li>
+<li><code>RiskFactorContribution</code>.</li>
+<li><code>Intervention</code>.</li>
+<li><code>AuditLog</code>.</li>
+<li><code>NotificationRecord</code>.</li>
+<li><code>ScoringConfiguration</code>.</li>
+<li><code>AnalyzerFindings</code>.</li>
+</ul>
+<p>If you change a shared type, search all references before saving the change.</p>
+</div></details>
+<details class="section level-2" id="src-context" open><summary><span><code>src/context/</code></span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<h3 id="authcontext-tsx"><code>AuthContext.tsx</code></h3>
+<p>Owns frontend authentication state:</p>
+<ul>
+<li>Current user.</li>
+<li>Authentication status.</li>
+<li>Login and admin quick login.</li>
+<li>Registration request.</li>
+<li>Logout.</li>
+<li>Local storage token/user restoration.</li>
+</ul>
+<h3 id="appcontext-tsx"><code>AppContext.tsx</code></h3>
+<p>Owns shared application UI state:</p>
+<ul>
+<li>Current page.</li>
+<li>Selected patient.</li>
+<li>Modal visibility and selected modal patient.</li>
+<li>AI drawer state.</li>
+<li>Dashboard summary.</li>
+<li>Scoring configuration.</li>
+<li>Toasts.</li>
+<li>Refresh triggers.</li>
+<li>Demo reset action.</li>
+</ul>
+<p>This is state navigation, not URL routing. Refreshing the browser does not preserve the selected page in the URL.</p>
+</div></details>
+<details class="section level-2" id="src-pages" open><summary><span><code>src/pages/</code></span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<div class="table-wrap"><table><thead><tr><th>File</th><th>Visible page</th><th>Main purpose</th></tr></thead><tbody><tr><td><code>LoginPage.tsx</code></td><td>Login</td><td>Authenticate staff and offer quick demo accounts</td></tr><tr><td><code>DashboardPage.tsx</code></td><td>Executive Dashboard</td><td>KPIs, charts, top high-risk patients, shortcuts</td></tr><tr><td><code>RiskQueuePage.tsx</code></td><td>Priority Risk Queue</td><td>Search, filters, ranking, actions, CSV export</td></tr><tr><td><code>PatientDetailsPage.tsx</code></td><td>Patient Details</td><td>Profile, risk, appointments, interventions, simulator</td></tr><tr><td><code>PatientsPage.tsx</code></td><td>Patient Records &amp; Directory</td><td>Search, filter, enrollment, map picker, admin workflows</td></tr><tr><td><code>PredictionPage.tsx</code></td><td>Clinical Risk Analyzer</td><td>Adjust inputs and inspect analyzer result</td></tr><tr><td><code>InterventionsPage.tsx</code></td><td>Patient Outreach &amp; Dispatch</td><td>Review and update intervention records</td></tr><tr><td><code>AnalyticsPage.tsx</code></td><td>Follow-up Impact &amp; Analytics</td><td>Trends, charts, and presentation-oriented metrics</td></tr><tr><td><code>SettingsPage.tsx</code></td><td>Scoring Model Config</td><td>Scoring controls and staff management UI</td></tr><tr><td><code>ApiDocsPage.tsx</code></td><td>Not currently linked</td><td>Static API documentation page component</td></tr><tr><td><code>RegisterPage.tsx</code></td><td>Not currently linked</td><td>Registration page component; API registration is still available</td></tr></tbody></table></div>
+</div></details>
+<details class="section level-2" id="src-components" open><summary><span><code>src/components/</code></span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<div class="table-wrap"><table><thead><tr><th>File</th><th>Purpose</th></tr></thead><tbody><tr><td><code>Navbar.tsx</code></td><td>Brand/header, dashboard shortcut, risk alert, AI drawer, logout</td></tr><tr><td><code>Sidebar.tsx</code></td><td>State-based navigation and admin-only Settings visibility</td></tr><tr><td><code>RiskCard.tsx</code></td><td>Compact risk card and action buttons</td></tr><tr><td><code>RiskGauge.tsx</code></td><td>Visual score gauge</td></tr><tr><td><code>RiskExplanationModal.tsx</code></td><td>Factor breakdown, reasons, protective factors, actions</td></tr><tr><td><code>WhatShouldIDoModal.tsx</code></td><td>Recommended intervention decision modal</td></tr><tr><td><code>InterventionModal.tsx</code></td><td>Manually create an intervention record</td></tr><tr><td><code>ContactPatientModal.tsx</code></td><td>Choose channel and record contact/outreach</td></tr><tr><td><code>AnalyzerFindingsModal.tsx</code></td><td>Display analyzer findings and continue to contact flow</td></tr><tr><td><code>EditPatientModal.tsx</code></td><td>Edit patient fields and refresh data</td></tr><tr><td><code>PdfReportModal.tsx</code></td><td>Browser print / Save as PDF workflow; no server PDF engine</td></tr><tr><td><code>AiAssistantDrawer.tsx</code></td><td>Gemini/fallback operations chat</td></tr><tr><td><code>RiskSimulator.tsx</code></td><td>Client-side hypothetical score changes</td></tr><tr><td><code>AppointmentTimeline.tsx</code></td><td>Appointment history display</td></tr><tr><td><code>MapAddressPicker.tsx</code></td><td>Leaflet map, geocoding, GPS, distance calculation</td></tr><tr><td><code>Toast.tsx</code></td><td>Global temporary success/info/warning/error messages</td></tr><tr><td><code>AdminLoginModal.tsx</code></td><td>Admin authentication modal used by some privileged flows</td></tr><tr><td><code>JudgeDemoBanner.tsx</code></td><td>Present in source but not mounted by the current <code>App.tsx</code></td></tr><tr><td><code>JavaArchitectureModal.tsx</code></td><td>Present demonstration code for a Java architecture, not active backend code</td></tr></tbody></table></div>
+</div></details>
+<details class="section level-2" id="src-services" open><summary><span><code>src/services/</code></span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<h3 id="api-ts"><code>api.ts</code></h3>
+<p>The frontend API client. It uses <code>VITE<em>API</em>BASE_URL</code> when present, otherwise <code>/api</code>. It attaches:</p>
+<ul>
+<li><code>Authorization: Bearer &lt;JWT&gt;</code>.</li>
+<li><code>x-staff-name</code>.</li>
+<li><code>x-staff-role</code>.</li>
+<li>Cache-control headers.</li>
+</ul>
+<h3 id="scoringengine-ts"><code>scoringEngine.ts</code></h3>
+<p>The shared deterministic scoring implementation. It is imported by backend code and the client-side simulator.</p>
+<h3 id="notificationservice-ts"><code>notificationService.ts</code></h3>
+<p>Implements Twilio SMS and demo notification behavior.</p>
+</div></details>
+<details class="section level-2" id="src-db" open><summary><span><code>src/db/</code></span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<h3 id="db-ts"><code>db.ts</code></h3>
+<p>Database connection, schema creation, seed logic, PostgreSQL repository methods, and local fallback stores.</p>
+</div></details>
+<details class="section level-2" id="src-data" open><summary><span><code>src/data/</code></span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<h3 id="seeddata-ts"><code>seedData.ts</code></h3>
+<p>Contains:</p>
+<ul>
+<li>Staff seed users.</li>
+<li>Indian cities/localities.</li>
+<li>Canonical patients, including Priya Patel.</li>
+<li>Synthetic dataset generation.</li>
+<li>Seed appointments, interventions, and audit logs.</li>
+</ul>
+<hr>
+<h1 id="6-how-to-run-the-project-locally">6. How to Run the Project Locally</h1>
+</div></details>
+<details class="section level-2" id="prerequisites" open><summary><span>Prerequisites</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Install:</p>
+<ul>
+<li>Node.js 18 or newer. Node 22 is the tested development version.</li>
+<li>npm.</li>
+<li>Optional: Docker Desktop if you want PostgreSQL through <code>docker-compose</code>.</li>
+<li>Optional: a PostgreSQL installation if you do not want the embedded fallback.</li>
+</ul>
+<p>The repository currently uses <code>package-lock.json</code>, so use npm for the normal workflow.</p>
+</div></details>
+<details class="section level-2" id="install-dependencies" open><summary><span>Install dependencies</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>From the repository root:</p>
+<pre><code class="language-bash">npm install</code></pre>
+<p>This creates <code>node_modules</code> and installs the dependencies in <code>package-lock.json</code>.</p>
+<p>For a clean CI/deployment install:</p>
+<pre><code class="language-bash">npm ci</code></pre>
+<p><code>npm ci</code> requires the lockfile and removes/recreates dependencies consistently.</p>
+</div></details>
+<details class="section level-2" id="create-local-environment-configuration" open><summary><span>Create local environment configuration</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Copy <code>.env.example</code> to <code>.env</code>.</p>
+<p>PowerShell:</p>
+<pre><code class="language-powershell">Copy-Item .env.example .env</code></pre>
+<p>At minimum for a local demo, you may use:</p>
+<pre><code class="language-env">NODE_ENV=development
+PORT=3000
+JWT_SECRET=local-only-demo-secret
+PG_MAX_CONNECTIONS=5</code></pre>
+<p>If <code>DATABASE_URL</code> is omitted during development, the database layer tries local PostgreSQL and then embedded PostgreSQL under <code>.pgdata</code>. The embedded PostgreSQL package may be slow on first startup because it initializes a local cluster.</p>
+<p>For a persistent local PostgreSQL connection, set:</p>
+<pre><code class="language-env">DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/caretrack</code></pre>
+<p>For Gemini:</p>
+<pre><code class="language-env">GEMINI_API_KEY=your-key-for-local-testing</code></pre>
+<p>For optional live SMS:</p>
+<pre><code class="language-env">TWILIO_ACCOUNT_SID=...
+TWILIO_AUTH_TOKEN=...
+TWILIO_PHONE_NUMBER=...</code></pre>
+<p>Never commit <code>.env</code> or real secrets.</p>
+</div></details>
+<details class="section level-2" id="development-command" open><summary><span>Development command</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<pre><code class="language-bash">npm run dev</code></pre>
+<p>This runs <code>tsx server.ts</code>. The server starts Express and mounts Vite middleware when a production build is not being served. Open:</p>
+<pre><code class="language-text">http://localhost:3000</code></pre>
+</div></details>
+<details class="section level-2" id="production-style-local-build" open><summary><span>Production-style local build</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<pre><code class="language-bash">npm run build
+npm start</code></pre>
+<p><code>npm run build</code> does two jobs:</p>
+<ol>
+<li><code>vite build</code> creates the browser assets in <code>dist</code>.</li>
+<li><code>npm run build:server</code> creates <code>dist-server/server.cjs</code>.</li>
+</ol>
+<p><code>npm start</code> runs the compiled server. It serves the built client and the API from one process.</p>
+</div></details>
+<details class="section level-2" id="typescript-check" open><summary><span>TypeScript check</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<pre><code class="language-bash">npm run lint</code></pre>
+<p>Despite the script name, this runs <code>tsc --noEmit</code>. It catches TypeScript errors but does not run ESLint rules.</p>
+</div></details>
+<details class="section level-2" id="local-docker-option" open><summary><span>Local Docker option</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<pre><code class="language-bash">docker compose up --build</code></pre>
+<p>This starts:</p>
+<ul>
+<li>A PostgreSQL 16 container named <code>caretrack-postgres</code>.</li>
+<li>An app container on port <code>3000</code>.</li>
+</ul>
+<p>The Compose database and the Render database are separate environments. Do not copy the Compose password into production.</p>
+</div></details>
+<details class="section level-2" id="first-successful-local-run-checklist" open><summary><span>First successful local run checklist</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<ol>
+<li>The server prints that it is listening on port 3000.</li>
+<li>Visit <code>http://localhost:3000</code>.</li>
+<li>Log in with <code>admin@caretrack.in</code> / <code>password123</code>.</li>
+<li>Confirm the dashboard loads.</li>
+<li>Search for <code>P-1042</code>.</li>
+<li>Open the patient and inspect the risk score.</li>
+<li>Open the AI drawer. Without <code>GEMINI<em>API</em>KEY</code>, the deterministic fallback should still answer supported questions.</li>
+</ol>
+<hr>
+<h1 id="7-environment-variables">7. Environment Variables</h1>
+<div class="table-wrap"><table><thead><tr><th>Variable</th><th>Required?</th><th>Used by</th><th>Meaning</th></tr></thead><tbody><tr><td><code>DATABASE_URL</code></td><td>Required in production</td><td><code>src/db/db.ts</code>, Render</td><td>PostgreSQL connection string</td></tr><tr><td><code>PG<em>MAX</em>CONNECTIONS</code></td><td>Optional</td><td><code>src/db/db.ts</code></td><td>PostgreSQL pool maximum; default is 5</td></tr><tr><td><code>JWT_SECRET</code></td><td>Required for secure production</td><td><code>server.ts</code>, Render</td><td>Signs and verifies login tokens</td></tr><tr><td><code>NODE_ENV</code></td><td>Recommended</td><td>server/db startup</td><td><code>production</code> enables production behavior</td></tr><tr><td><code>PORT</code></td><td>Render supplies it</td><td><code>server.ts</code></td><td>HTTP listening port; local default 3000</td></tr><tr><td><code>GEMINI<em>API</em>KEY</code></td><td>Optional</td><td><code>server.ts</code></td><td>Enables Gemini Assistant calls</td></tr><tr><td><code>TWILIO<em>ACCOUNT</em>SID</code></td><td>Optional</td><td><code>notificationService.ts</code></td><td>Twilio account id</td></tr><tr><td><code>TWILIO<em>AUTH</em>TOKEN</code></td><td>Optional</td><td><code>notificationService.ts</code></td><td>Twilio credential</td></tr><tr><td><code>TWILIO<em>PHONE</em>NUMBER</code></td><td>Optional</td><td><code>notificationService.ts</code></td><td>Twilio sender number</td></tr><tr><td><code>VITE<em>API</em>BASE_URL</code></td><td>Optional</td><td><code>src/services/api.ts</code></td><td>API base URL; default <code>/api</code></td></tr></tbody></table></div>
+</div></details>
+<details class="section level-2" id="public-versus-secret-variables" open><summary><span>Public versus secret variables</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p><code>VITE<em><em></code> variables are available to browser code after Vite builds them. Never put a secret in a <code>VITE</em></em></code> variable.</p>
+<p><code>DATABASE<em>URL</code>, <code>JWT</em>SECRET</code>, <code>GEMINI<em>API</em>KEY</code>, and Twilio credentials are server-side secrets. They are read by Node code and must only be configured in the Render service environment or local <code>.env</code>.</p>
+</div></details>
+<details class="section level-2" id="render-environment-behavior" open><summary><span>Render environment behavior</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p><code>render.yaml</code> automatically supplies:</p>
+<ul>
+<li><code>DATABASE_URL</code> from the linked database.</li>
+<li>A generated <code>JWT_SECRET</code>.</li>
+<li><code>NODE_ENV=production</code>.</li>
+<li><code>PG<em>MAX</em>CONNECTIONS=5</code>.</li>
+</ul>
+<p>You can add optional Gemini and Twilio variables in Render’s service settings.</p>
+</div></details>
+<details class="section level-2" id="production-database-requirement" open><summary><span>Production database requirement</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>When <code>NODE<em>ENV=production</code> and <code>DATABASE</em>URL</code> is missing, the database initialization throws an explicit configuration error. This is intentional: production should not silently start with a temporary local database.</p>
+<p>If a configured production <code>DATABASE_URL</code> cannot connect, inspect the connection logs. The database layer still contains local fallback branches for the existing development behavior, so verify the actual environment and connection string rather than assuming persistence.</p>
+<hr>
+<h1 id="8-authentication-and-roles">8. Authentication and Roles</h1>
+</div></details>
+<details class="section level-2" id="login-flow" open><summary><span>Login flow</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The UI is in <code>src/pages/LoginPage.tsx</code>. The state and storage logic is in <code>src/context/AuthContext.tsx</code>.</p>
+<p>The login request is:</p>
+<pre><code class="language-text">POST /api/auth/login
+Content-Type: application/json
+
+{
+  &quot;email&quot;: &quot;admin@caretrack.in&quot;,
+  &quot;password&quot;: &quot;password123&quot;
+}</code></pre>
+<p>The server:</p>
+<ol>
+<li>Trims and lowercases the email.</li>
+<li>Looks up the user.</li>
+<li>Supports demo aliases such as email text containing <code>admin</code>, <code>doctor</code>, <code>nurse</code>, <code>coordinator</code>, or <code>manager</code>.</li>
+<li>Supports demo plaintext/placeholder passwords and bcrypt hashes.</li>
+<li>Logs the login to <code>audit_logs</code>.</li>
+<li>Removes <code>passwordHash</code> from the returned user object.</li>
+<li>Signs a JWT containing id, role, email, and name.</li>
+</ol>
+<p>The browser stores:</p>
+<pre><code class="language-text">caretrack_token
+caretrack_user</code></pre>
+<p>in <code>localStorage</code>.</p>
+</div></details>
+<details class="section level-2" id="logout-flow" open><summary><span>Logout flow</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Logout is frontend-driven:</p>
+<ol>
+<li>A short visual delay is shown.</li>
+<li><code>caretrack_user</code> is removed.</li>
+<li><code>caretrack_token</code> is removed.</li>
+<li>The application returns to <code>LoginPage</code>.</li>
+</ol>
+<p>There is no server-side token revocation endpoint. JWT expiration is the main token lifetime control.</p>
+</div></details>
+<details class="section level-2" id="roles-in-the-frontend" open><summary><span>Roles in the frontend</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p><code>AuthContext</code> exposes booleans:</p>
+<ul>
+<li><code>isAdmin</code>.</li>
+<li><code>isDoctor</code>.</li>
+<li><code>isNurse</code>.</li>
+<li><code>isCoordinator</code>.</li>
+<li><code>isCareManager</code>.</li>
+</ul>
+<p><code>Sidebar</code> only displays Settings to <code>ADMIN</code>. <code>PatientsPage</code> labels enrollment and editing as admin workflows. The UI is helpful guidance, not the complete security boundary.</p>
+</div></details>
+<details class="section level-2" id="roles-in-the-backend" open><summary><span>Roles in the backend</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p><code>requireAuth</code> validates the JWT. <code>requireRole(...)</code> exists and is used for the scoring configuration update route.</p>
+<p>The current backend role enforcement is incomplete. Several routes use <code>requireAuth</code> without a role restriction, including patient writes, user management, demo reset/generation, analyzer, and outreach. Do not claim that every action is server-side RBAC-enforced.</p>
+<p>This is an important production hardening task, but it is outside the scope of this walkthrough document and should be planned as a separate security change.</p>
+</div></details>
+<details class="section level-2" id="seed-accounts" open><summary><span>Seed accounts</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<div class="table-wrap"><table><thead><tr><th>Email</th><th>Password</th><th>Role</th></tr></thead><tbody><tr><td><code>doctor@caretrack.in</code></td><td><code>password123</code></td><td><code>DOCTOR</code></td></tr><tr><td><code>nurse@caretrack.in</code></td><td><code>password123</code></td><td><code>NURSE</code></td></tr><tr><td><code>coordinator@caretrack.in</code></td><td><code>password123</code></td><td><code>COORDINATOR</code></td></tr><tr><td><code>caremanager@caretrack.in</code></td><td><code>password123</code></td><td><code>CARE_MANAGER</code></td></tr><tr><td><code>admin@caretrack.in</code></td><td><code>password123</code></td><td><code>ADMIN</code></td></tr></tbody></table></div>
+<p>These are demo accounts, not secure operational credentials.</p>
+<hr>
+<h1 id="9-frontend-walkthrough">9. Frontend Walkthrough</h1>
+</div></details>
+<details class="section level-2" id="login-screen" open><summary><span>Login screen</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>File: <code>src/pages/LoginPage.tsx</code></p>
+<p>What to demonstrate:</p>
+<ol>
+<li>Show the login form.</li>
+<li>Use a quick login button if present.</li>
+<li>Explain that successful login stores a JWT in browser storage.</li>
+<li>Mention that the user’s role controls visible navigation.</li>
+</ol>
+<p>The registration page component exists, but it is not currently connected into the main login navigation. The registration API is available at <code>POST /api/auth/register</code> and the admin Settings screen can register staff.</p>
+</div></details>
+<details class="section level-2" id="main-layout" open><summary><span>Main layout</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>File: <code>src/App.tsx</code></p>
+<p>After authentication, the page contains:</p>
+<ul>
+<li><code>Navbar</code> at the top.</li>
+<li><code>Sidebar</code> on the left.</li>
+<li>One state-selected page in the main area.</li>
+<li>Globally mounted modal components.</li>
+<li>AI assistant drawer.</li>
+<li>Toast notifications.</li>
+</ul>
+<p>There are no URL routes such as <code>/dashboard</code> or <code>/patients</code>. Navigation is internal React state. A browser refresh returns to the default page after session restoration.</p>
+</div></details>
+<details class="section level-2" id="executive-dashboard" open><summary><span>Executive Dashboard</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>File: <code>src/pages/DashboardPage.tsx</code></p>
+<p>Visible areas:</p>
+<ul>
+<li>Patient Follow-up Risk Dashboard heading.</li>
+<li>High-risk patient count.</li>
+<li>Follow-ups due within seven days.</li>
+<li>Interventions logged and pending.</li>
+<li>Outreach success rate.</li>
+<li>Top priority high-risk follow-ups table.</li>
+<li>Risk distribution chart.</li>
+<li>Trend charts.</li>
+<li>Shortcuts to risk queue, interventions, analytics, patient details, risk explanation, contact, and AI assistant.</li>
+</ul>
+<p>Important accuracy note: dashboard values can be loaded from the backend, but the component contains fallback display values if data is unavailable. Treat rendered fallback numbers as demo placeholders.</p>
+</div></details>
+<details class="section level-2" id="priority-risk-queue" open><summary><span>Priority Risk Queue</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>File: <code>src/pages/RiskQueuePage.tsx</code></p>
+<p>Use this screen to demonstrate ranking:</p>
+<ol>
+<li>Open <strong>Priority Risk Queue</strong> in the sidebar.</li>
+<li>Search by patient name, patient code, or condition.</li>
+<li>Choose a risk tier.</li>
+<li>Filter intervention status.</li>
+<li>Filter due dates such as today or next seven days.</li>
+<li>Change sort field/order.</li>
+<li>Change pages.</li>
+<li>Click a patient to open details.</li>
+<li>Use <strong>Why?</strong> to open factor explanations.</li>
+<li>Use <strong>What should I do?</strong> to open action recommendations.</li>
+<li>Use the intervention/contact buttons.</li>
+<li>Export the visible risk population through CSV.</li>
+</ol>
+<p>The queue is the best screen for the “Rank” part of the pitch.</p>
+</div></details>
+<details class="section level-2" id="patient-records-directory" open><summary><span>Patient Records &amp; Directory</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>File: <code>src/pages/PatientsPage.tsx</code></p>
+<p>This page supports:</p>
+<ul>
+<li>Search.</li>
+<li>Risk filtering.</li>
+<li>Pagination.</li>
+<li>Opening a patient.</li>
+<li>Calling a visible phone number through the browser’s <code>tel:</code> link.</li>
+<li>Admin-visible enrollment workflow.</li>
+<li>Address selection with the map picker.</li>
+<li>Edit patient modal.</li>
+<li>Analyzer workflow.</li>
+<li>Contact workflow.</li>
+</ul>
+<p>The backend currently authorizes these routes with JWT authentication but does not consistently enforce the frontend’s admin-only claims. Explain that distinction if a judge asks about security.</p>
+</div></details>
+<details class="section level-2" id="patient-details" open><summary><span>Patient Details</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>File: <code>src/pages/PatientDetailsPage.tsx</code></p>
+<p>The page combines:</p>
+<ul>
+<li>Patient demographics and condition.</li>
+<li>Risk score and risk level.</li>
+<li>Risk factor breakdown.</li>
+<li>Appointment timeline.</li>
+<li>Existing interventions.</li>
+<li>Action recommendation.</li>
+<li>What-If simulator.</li>
+<li>Edit action.</li>
+<li>Clinical analyzer action.</li>
+<li>Contact action.</li>
+<li>Print/save report action.</li>
+</ul>
+<p>This is the best screen for explaining one patient from raw inputs to an action plan.</p>
+</div></details>
+<details class="section level-2" id="clinical-risk-analyzer" open><summary><span>Clinical Risk Analyzer</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>File: <code>src/pages/PredictionPage.tsx</code></p>
+<p>This page lets a user adjust risk-related inputs and see a calculated analysis. The UI calls <code>/api/analyzer/process</code> for server analysis. The code also recalculates the preview as values change.</p>
+<p>The analyzer returns <code>AnalyzerFindings</code>, including:</p>
+<ul>
+<li>Patient identity.</li>
+<li>Risk score and tier.</li>
+<li>Evidence coverage.</li>
+<li>Primary drivers.</li>
+<li>Follow-up barriers.</li>
+<li>Clinical hazards.</li>
+<li>Recommended actions.</li>
+<li>Suggested intervention.</li>
+<li>A message draft.</li>
+</ul>
+<p>The analyzer does not use Gemini. It uses the deterministic scoring engine and server-generated operational text.</p>
+</div></details>
+<details class="section level-2" id="outreach-and-dispatch" open><summary><span>Outreach and Dispatch</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>File: <code>src/pages/InterventionsPage.tsx</code></p>
+<p>This page lists intervention records and supports status updates. The main creation/contact experience is in <code>ContactPatientModal</code> and <code>InterventionModal</code>.</p>
+<p>Typical status values include:</p>
+<ul>
+<li><code>Pending</code>.</li>
+<li><code>Contacted</code>.</li>
+<li><code>Confirmed</code>.</li>
+<li><code>Rescheduled</code>.</li>
+<li><code>Completed</code>.</li>
+<li><code>Escalated</code>.</li>
+<li><code>Unable to Reach</code>.</li>
+</ul>
+</div></details>
+<details class="section level-2" id="analytics" open><summary><span>Analytics</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>File: <code>src/pages/AnalyticsPage.tsx</code></p>
+<p>This page displays charts based on backend trend data and presentation-oriented KPI cards. Some headline business metrics are hardcoded for the demo. They are not a measured ROI calculation.</p>
+<p>Use it to show:</p>
+<ul>
+<li>Risk trend visualization.</li>
+<li>Attendance trend visualization.</li>
+<li>Risk factor frequency.</li>
+<li>Intervention success chart.</li>
+<li>Operational impact narrative.</li>
+</ul>
+</div></details>
+<details class="section level-2" id="settings" open><summary><span>Settings</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>File: <code>src/pages/SettingsPage.tsx</code></p>
+<p>Settings has two tabs:</p>
+<ol>
+<li><strong>Scoring Engine</strong></li>
+</ol>
+<ul>
+<li>Adjust maximum factor point caps.</li>
+<li>Save configuration.</li>
+<li>Reset to defaults.</li>
+</ul>
+<ol>
+<li><strong>Staff &amp; User Registration</strong></li>
+</ol>
+<ul>
+<li>Load staff list.</li>
+<li>Search staff.</li>
+<li>Register staff.</li>
+<li>Delete non-primary staff.</li>
+</ul>
+<p>The sidebar exposes Settings only when the frontend user role is <code>ADMIN</code>. The server uses <code>requireRole('ADMIN')</code> specifically for updating scoring configuration.</p>
+</div></details>
+<details class="section level-2" id="global-modals-and-drawer" open><summary><span>Global modals and drawer</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The global workflow components are mounted by <code>App.tsx</code> even though they are opened from different pages:</p>
+<ul>
+<li>Risk explanation.</li>
+<li>Recommended action.</li>
+<li>Intervention creation.</li>
+<li>Patient contact.</li>
+<li>Analyzer findings.</li>
+<li>Patient editing.</li>
+<li>Browser report/print.</li>
+<li>Gemini assistant.</li>
+<li>Admin login.</li>
+</ul>
+<hr>
+<h1 id="10-risk-scoring-engine">10. Risk Scoring Engine</h1>
+</div></details>
+<details class="section level-2" id="default-weights" open><summary><span>Default weights</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The default configuration in <code>DEFAULT<em>SCORING</em>CONFIG</code> is:</p>
+<div class="table-wrap"><table><thead><tr><th>Factor</th><th>Maximum points</th></tr></thead><tbody><tr><td>Missed appointments</td><td>35</td></tr><tr><td>Distance</td><td>20</td></tr><tr><td>Attendance rate</td><td>20</td></tr><tr><td>Appointment frequency</td><td>10</td></tr><tr><td>Treatment duration</td><td>10</td></tr><tr><td>Age</td><td>5</td></tr><tr><td><strong>Total</strong></td><td><strong>100</strong></td></tr></tbody></table></div>
+</div></details>
+<details class="section level-2" id="actual-formulas" open><summary><span>Actual formulas</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<h3 id="1-missed-appointments">1. Missed appointments</h3>
+<pre><code class="language-text">base = min(missedAppointments * 7, 35)
+points = round((base / 35) * missedWeight)</code></pre>
+<p>With the default weight:</p>
+<div class="table-wrap"><table><thead><tr><th>Missed visits</th><th>Points</th></tr></thead><tbody><tr><td>0</td><td>0</td></tr><tr><td>1</td><td>7</td></tr><tr><td>2</td><td>14</td></tr><tr><td>3</td><td>21</td></tr><tr><td>4</td><td>28</td></tr><tr><td>5 or more</td><td>35</td></tr></tbody></table></div>
+<h3 id="2-distance">2. Distance</h3>
+<pre><code class="language-text">base = min((distanceKm / 45) * 20, 20)
+points = round((base / 20) * distanceWeight)</code></pre>
+<p>The score reaches the full 20 distance points at 45 km. The explanatory text treats 30 km as a significant barrier, but 30 km is not the full-point threshold.</p>
+<h3 id="3-attendance">3. Attendance</h3>
+<pre><code class="language-text">attendanceRate = round(attendedAppointments / totalAppointments * 100)
+base = min(((100 - attendanceRate) / 50) * 20, 20)
+points = round((base / 20) * attendanceWeight)</code></pre>
+<p>Attendance of 50% or below reaches the full attendance penalty.</p>
+<h3 id="4-appointment-cadence">4. Appointment cadence</h3>
+<pre><code class="language-text">base = min((appointmentFrequencyDays / 90) * 10, 10)
+points = round((base / 10) * frequencyWeight)</code></pre>
+<p>The engine labels intervals over 60 days as infrequent, but the numeric score reaches the maximum at 90 days.</p>
+<h3 id="5-treatment-duration">5. Treatment duration</h3>
+<pre><code class="language-text">base = min((treatmentDurationMonths / 24) * 10, 10)
+points = round((base / 10) * durationWeight)</code></pre>
+<p>The explanatory language starts calling 12 months an extended journey; the numeric maximum occurs at 24 months.</p>
+<h3 id="6-age">6. Age</h3>
+<pre><code class="language-text">if age &gt; 50:
+  agePoints = min(((age - 50) / 50) * 5, 5)
+else if age &lt; 18:
+  agePoints = min(((18 - age) / 18) * 5, 5)
+else:
+  agePoints = 0</code></pre>
+<p>The explanation text highlights age 65 and pediatric age below 12, but the numeric calculation begins increasing above 50 and below 18. This is an important code-versus-presentation discrepancy.</p>
+</div></details>
+<details class="section level-2" id="total-and-tier" open><summary><span>Total and tier</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<pre><code class="language-text">score = min(100, max(0, sum of six factor points))</code></pre>
+<p>Default tiers:</p>
+<div class="table-wrap"><table><thead><tr><th>Score</th><th>Tier</th></tr></thead><tbody><tr><td>0-29</td><td><code>LOW</code></td></tr><tr><td>30-59</td><td><code>MEDIUM</code></td></tr><tr><td>60-79</td><td><code>HIGH</code></td></tr><tr><td>80-100</td><td><code>CRITICAL</code></td></tr></tbody></table></div>
+<p>The thresholds are stored in <code>ScoringConfiguration</code>. The scoring page can change weights, but always verify the resulting configuration because legacy threshold fields and nested threshold fields both exist in the type.</p>
+</div></details>
+<details class="section level-2" id="scoring-output" open><summary><span>Scoring output</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p><code>calculatePatientRisk(...)</code> returns:</p>
+<ul>
+<li><code>score</code>.</li>
+<li><code>riskLevel</code>.</li>
+<li><code>confidence</code>.</li>
+<li><code>evidenceCoverage</code>.</li>
+<li><code>predictionDate</code>.</li>
+<li><code>modelVersion</code>.</li>
+<li><code>reasons</code>.</li>
+<li><code>protectiveFactors</code>.</li>
+<li><code>recommendedActions</code>.</li>
+<li><code>immediateAction</code>.</li>
+<li><code>secondaryAction</code>.</li>
+<li><code>alternativeAction</code>.</li>
+<li><code>topFactors</code>.</li>
+<li><code>naturalLanguageSummary</code>.</li>
+<li><code>responsibleAiNote</code>.</li>
+<li><code>inputSnapshot</code>.</li>
+</ul>
+</div></details>
+<details class="section level-2" id="important-interpretation-rule" open><summary><span>Important interpretation rule</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The score is an operational prioritization score, not a medical diagnosis and not a probability of readmission. Do not call <code>83</code> an “83% chance” of anything.</p>
+<hr>
+<h1 id="11-patient-data-flow">11. Patient Data Flow</h1>
+</div></details>
+<details class="section level-2" id="creating-a-patient" open><summary><span>Creating a patient</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>UI path:</p>
+<pre><code class="language-text">Patients -&gt; + Enroll New Patient -&gt; fill form -&gt; optional map picker -&gt; save</code></pre>
+<p>Frontend:</p>
+<ul>
+<li><code>PatientsPage.tsx</code>.</li>
+<li><code>MapAddressPicker.tsx</code>.</li>
+<li><code>api.createPatient(...)</code>.</li>
+</ul>
+<p>Request:</p>
+<pre><code class="language-text">POST /api/patients</code></pre>
+<p>Backend:</p>
+<ol>
+<li>Read request body.</li>
+<li>Calculate totals and attendance values.</li>
+<li>Validate missed appointments are not greater than total.</li>
+<li>Build an id and patient code.</li>
+<li>Calculate current risk.</li>
+<li>Save through <code>dbCreatePatient(...)</code>.</li>
+<li>Log patient enrollment.</li>
+<li>Return the new patient.</li>
+</ol>
+<p>Database:</p>
+<ul>
+<li>Inserts into <code>patients</code>.</li>
+<li>May insert a prediction record depending on repository logic.</li>
+<li>Logs to <code>audit_logs</code>.</li>
+</ul>
+</div></details>
+<details class="section level-2" id="reading-a-patient-list" open><summary><span>Reading a patient list</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>UI sends filters to <code>GET /api/patients</code>. The repository supports search, risk level, intervention status, due filter, sort, page, and limit.</p>
+<p>The backend returns:</p>
+<pre><code class="language-json">{
+  &quot;success&quot;: true,
+  &quot;data&quot;: [],
+  &quot;pagination&quot;: {
+    &quot;total&quot;: 1000,
+    &quot;page&quot;: 1,
+    &quot;limit&quot;: 15,
+    &quot;totalPages&quot;: 67
+  }
+}</code></pre>
+</div></details>
+<details class="section level-2" id="updating-a-patient" open><summary><span>Updating a patient</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>UI path:</p>
+<pre><code class="language-text">Patients or Patient Details -&gt; Edit -&gt; save</code></pre>
+<p>Request:</p>
+<pre><code class="language-text">PUT /api/patients/:id</code></pre>
+<p>The server updates fields, recalculates risk, writes the patient, and records an audit action.</p>
+</div></details>
+<details class="section level-2" id="appointment-history" open><summary><span>Appointment history</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Appointments are stored in the <code>appointments</code> table and returned as part of patient detail. The UI visualizes them through <code>AppointmentTimeline.tsx</code>.</p>
+<p>The appointment data includes:</p>
+<ul>
+<li>Date.</li>
+<li>Department.</li>
+<li>Doctor.</li>
+<li>Status.</li>
+<li>Notes.</li>
+</ul>
+</div></details>
+<details class="section level-2" id="intervention-history" open><summary><span>Intervention history</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Interventions are stored in <code>interventions</code>. A patient detail response includes the patient’s intervention records. The Interventions page lists them across patients.</p>
+</div></details>
+<details class="section level-2" id="notification-history" open><summary><span>Notification history</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Notifications are stored in <code>notifications</code>, but the current application does not expose a dedicated notification history endpoint. The result of a contact workflow is shown in the modal/toast and represented through the linked intervention and audit log.</p>
+<hr>
+<h1 id="12-backend-api-reference">12. Backend API Reference</h1>
+<p>All routes are defined in <code>server.ts</code>. The Express app is the API; there are no active Vercel function wrappers.</p>
+</div></details>
+<details class="section level-2" id="public-routes" open><summary><span>Public routes</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<div class="table-wrap"><table><thead><tr><th>Method</th><th>Path</th><th>Purpose</th></tr></thead><tbody><tr><td><code>GET</code></td><td><code>/api</code></td><td>Health/root response</td></tr><tr><td><code>GET</code></td><td><code>/api/health</code></td><td>Health check for Render</td></tr><tr><td><code>POST</code></td><td><code>/api/auth/login</code></td><td>Authenticate staff and return JWT</td></tr><tr><td><code>POST</code></td><td><code>/api/auth/register</code></td><td>Register a staff account</td></tr></tbody></table></div>
+</div></details>
+<details class="section level-2" id="authenticated-routes" open><summary><span>Authenticated routes</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<div class="table-wrap"><table><thead><tr><th>Method</th><th>Path</th><th>Purpose</th></tr></thead><tbody><tr><td><code>GET</code></td><td><code>/api/users</code></td><td>List staff users</td></tr><tr><td><code>DELETE</code></td><td><code>/api/users/:email</code></td><td>Delete a staff user except primary admin</td></tr><tr><td><code>GET</code></td><td><code>/api/patients</code></td><td>Search/filter/paginate patients</td></tr><tr><td><code>GET</code></td><td><code>/api/patients/:id</code></td><td>Patient detail, appointments, interventions, risk</td></tr><tr><td><code>POST</code></td><td><code>/api/patients</code></td><td>Create patient</td></tr><tr><td><code>PUT</code></td><td><code>/api/patients/:id</code></td><td>Update patient</td></tr><tr><td><code>POST</code></td><td><code>/api/analyzer/process</code></td><td>Generate deterministic analyzer findings</td></tr><tr><td><code>POST</code></td><td><code>/api/patients/:id/contact</code></td><td>Contact workflow and notification/intervention record</td></tr><tr><td><code>POST</code></td><td><code>/api/predictions/predict</code></td><td>Calculate prediction from raw inputs</td></tr><tr><td><code>GET</code></td><td><code>/api/predictions</code></td><td>Read prediction history</td></tr><tr><td><code>GET</code></td><td><code>/api/patients/:id/risk</code></td><td>Calculate/read patient risk</td></tr><tr><td><code>POST</code></td><td><code>/api/interventions</code></td><td>Create intervention</td></tr><tr><td><code>GET</code></td><td><code>/api/interventions</code></td><td>List interventions</td></tr><tr><td><code>PUT</code></td><td><code>/api/interventions/:id/status</code></td><td>Update intervention status</td></tr><tr><td><code>GET</code></td><td><code>/api/dashboard/summary</code></td><td>Dashboard KPI summary</td></tr><tr><td><code>GET</code></td><td><code>/api/dashboard/risk-distribution</code></td><td>Risk distribution data</td></tr><tr><td><code>GET</code></td><td><code>/api/dashboard/trends</code></td><td>Trend/chart data</td></tr><tr><td><code>GET</code></td><td><code>/api/settings/config</code></td><td>Read scoring configuration</td></tr><tr><td><code>POST</code></td><td><code>/api/demo/reset</code></td><td>Reset demo data</td></tr><tr><td><code>POST</code></td><td><code>/api/demo/generate</code></td><td>Generate a synthetic dataset</td></tr><tr><td><code>POST</code></td><td><code>/api/assistant/chat</code></td><td>Gemini or fallback operations response</td></tr><tr><td><code>GET</code></td><td><code>/api/audit-logs</code></td><td>Read audit logs</td></tr><tr><td><code>GET</code></td><td><code>/api/export/csv</code></td><td>Download up to 1,000 patients as CSV</td></tr></tbody></table></div>
+</div></details>
+<details class="section level-2" id="admin-protected-route" open><summary><span>Admin-protected route</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<div class="table-wrap"><table><thead><tr><th>Method</th><th>Path</th><th>Protection</th></tr></thead><tbody><tr><td><code>PUT</code></td><td><code>/api/settings/config</code></td><td>JWT plus <code>requireRole('ADMIN')</code></td></tr></tbody></table></div>
+<p>The current backend does not apply <code>requireRole('ADMIN')</code> to every action that the UI describes as admin-only. This is a known security limitation and should be stated honestly.</p>
+</div></details>
+<details class="section level-2" id="api-request-example" open><summary><span>API request example</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<pre><code class="language-powershell">$body = @{ email = 'admin@caretrack.in'; password = 'password123' } | ConvertTo-Json
+$login = Invoke-WebRequest `
+  -Uri http://localhost:3000/api/auth/login `
+  -Method Post `
+  -ContentType 'application/json' `
+  -Body $body
+$token = ($login.Content | ConvertFrom-Json).token
+
+Invoke-WebRequest `
+  -Uri 'http://localhost:3000/api/patients?limit=1' `
+  -Headers @{ Authorization = &quot;Bearer $token&quot; }</code></pre>
+<p>Do not print or share the token outside a local test.</p>
+<hr>
+<h1 id="13-database-architecture">13. Database Architecture</h1>
+</div></details>
+<details class="section level-2" id="connection-order" open><summary><span>Connection order</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p><code>src/db/db.ts</code> uses this order:</p>
+<ol>
+<li><code>DATABASE_URL</code>.</li>
+<li>A direct local PostgreSQL connection on port 5432.</li>
+<li>Embedded PostgreSQL on port 5433 for local development.</li>
+<li>In-memory Maps/arrays if the allowed database options fail outside the production requirement.</li>
+</ol>
+<p>Render should use step 1.</p>
+</div></details>
+<details class="section level-2" id="tables" open><summary><span>Tables</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<h3 id="users"><code>users</code></h3>
+<p>Stores staff identity, email, role, department, employee id, phone, password hash, and creation time.</p>
+<h3 id="patients"><code>patients</code></h3>
+<p>Stores patient identity, demographics, address, coordinates, distance, condition, treatment, appointment totals, attendance, risk JSON, latest intervention JSON, and timestamps.</p>
+<h3 id="appointments"><code>appointments</code></h3>
+<p>Stores appointment date, department, doctor, status, notes, and patient id.</p>
+<h3 id="predictions"><code>predictions</code></h3>
+<p>Stores score, tier, evidence, model version, reasons, protective factors, recommended actions, snapshots, and natural-language fields when a prediction is persisted.</p>
+<h3 id="interventions"><code>interventions</code></h3>
+<p>Stores patient, prediction, staff, intervention type, status, notes, outcome, confirmation, creation time, and completion time.</p>
+<h3 id="notifications"><code>notifications</code></h3>
+<p>Stores channel, destination, message content, status, provider, demo/live flag, and timestamp.</p>
+<h3 id="audit-logs"><code>audit_logs</code></h3>
+<p>Stores timestamp, staff name, staff role, action, details, and optional patient code.</p>
+<h3 id="scoring-configs"><code>scoring_configs</code></h3>
+<p>Stores a JSON scoring configuration and update timestamp.</p>
+</div></details>
+<details class="section level-2" id="startup-and-seeding" open><summary><span>Startup and seeding</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>On first database initialization:</p>
+<ol>
+<li>Tables and indexes are created.</li>
+<li>The patient count is checked.</li>
+<li>If there are no patients, the application seeds 1,000 records.</li>
+<li>Seed users, scoring configuration, appointments, interventions, predictions, and audit logs are inserted.</li>
+</ol>
+<p>The seed data includes ten canonical Indian demonstration patients plus generated patients.</p>
+</div></details>
+<details class="section level-2" id="persistence-warning" open><summary><span>Persistence warning</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The in-memory store is useful for a local fallback/demo but is not durable across process restarts or multiple Render instances. A production Render deployment should connect successfully to the managed PostgreSQL database.</p>
+</div></details>
+<details class="section level-2" id="embedded-postgresql-warning" open><summary><span>Embedded PostgreSQL warning</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Embedded PostgreSQL is a local-development convenience. It writes under <code>.pgdata</code>, which is ignored by git. It is not a replacement for Render’s managed database.</p>
+<hr>
+<h1 id="14-gemini-clinical-operations-assistant">14. Gemini Clinical Operations Assistant</h1>
+</div></details>
+<details class="section level-2" id="where-it-lives" open><summary><span>Where it lives</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Frontend:</p>
+<ul>
+<li><code>src/components/AiAssistantDrawer.tsx</code>.</li>
+<li><code>src/services/api.ts</code>, method <code>askAssistant(...)</code>.</li>
+</ul>
+<p>Backend:</p>
+<ul>
+<li><code>server.ts</code>, <code>getGeminiClient()</code>.</li>
+<li><code>POST /api/assistant/chat</code>.</li>
+</ul>
+<p>Dependency:</p>
+<pre><code class="language-json">&quot;@google/genai&quot;: &quot;^2.4.0&quot;</code></pre>
+<p>Current model:</p>
+<pre><code class="language-text">gemini-3.6-flash</code></pre>
+</div></details>
+<details class="section level-2" id="what-gemini-receives" open><summary><span>What Gemini receives</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The backend builds a prompt containing:</p>
+<ul>
+<li>Total patient count.</li>
+<li>High/critical patient count.</li>
+<li>Count of high-risk patients beyond 30 km.</li>
+<li>Optional context for a requested patient id.</li>
+<li>The user’s question.</li>
+</ul>
+<p>The instructions say to answer operational follow-up and prioritization questions only, and not diagnose or prescribe.</p>
+</div></details>
+<details class="section level-2" id="example-questions" open><summary><span>Example questions</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The drawer suggests questions such as:</p>
+<pre><code class="language-text">Why is patient P-1042 high risk?
+How many high risk patients live beyond 30 km?</code></pre>
+<p>The backend detects patient codes and can produce patient-specific context.</p>
+</div></details>
+<details class="section level-2" id="fallback-mode" open><summary><span>Fallback mode</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>If there is no usable <code>GEMINI<em>API</em>KEY</code>, or Gemini returns an error, the backend returns deterministic responses based on keywords such as:</p>
+<ul>
+<li><code>distance</code>.</li>
+<li><code>far</code>.</li>
+<li><code>km</code>.</li>
+<li><code>high risk</code>.</li>
+<li><code>queue</code>.</li>
+<li><code>how many</code>.</li>
+<li>A patient code.</li>
+</ul>
+<p>This means the demo can still show an assistant response without live Gemini. Be clear that fallback text is not generated by Gemini.</p>
+</div></details>
+<details class="section level-2" id="what-is-not-implemented" open><summary><span>What is not implemented</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The current assistant is not:</p>
+<ul>
+<li>A diagnostic assistant.</li>
+<li>A medication assistant.</li>
+<li>A medical decision maker.</li>
+<li>A guaranteed PHI-redacted service.</li>
+<li>An audited clinical language model gateway.</li>
+</ul>
+<p>The code includes operational guardrails in the prompt, but production privacy and governance controls would require additional work.</p>
+</div></details>
+<details class="section level-2" id="demo-steps" open><summary><span>Demo steps</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<ol>
+<li>Log in.</li>
+<li>Click the AI assistant button in the navbar.</li>
+<li>Ask <code>Why is patient P-1042 high risk?</code>.</li>
+<li>Point out the operational explanation.</li>
+<li>Explain that the score itself comes from the deterministic scoring engine.</li>
+<li>If no Gemini key is configured, describe the visible response as deterministic demo fallback.</li>
+</ol>
+<hr>
+<h1 id="15-gis-and-map-features">15. GIS and Map Features</h1>
+</div></details>
+<details class="section level-2" id="map-component" open><summary><span>Map component</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>File: <code>src/components/MapAddressPicker.tsx</code></p>
+<p>It uses:</p>
+<ul>
+<li>Leaflet.</li>
+<li>OpenStreetMap tiles.</li>
+<li>OpenStreetMap Nominatim search.</li>
+<li>Browser geolocation when permission is granted.</li>
+<li>Local Indian city and locality presets.</li>
+<li>A fixed reference hospital coordinate.</li>
+<li>Haversine distance calculation.</li>
+</ul>
+<p>Reference coordinates:</p>
+<pre><code class="language-text">Latitude:  28.5672
+Longitude: 77.2100</code></pre>
+</div></details>
+<details class="section level-2" id="how-to-access-it" open><summary><span>How to access it</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<ol>
+<li>Log in as the admin demo user.</li>
+<li>Open <strong>Patient Records &amp; Directory</strong>.</li>
+<li>Click <strong>+ Enroll New Patient</strong>.</li>
+<li>Open the address/map picker.</li>
+<li>Search for a place, choose a preset, click the map, drag the marker, or use browser location.</li>
+<li>Save the selected address and distance into the patient form.</li>
+</ol>
+</div></details>
+<details class="section level-2" id="how-distance-is-calculated" open><summary><span>How distance is calculated</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The map component uses the Haversine formula to calculate rounded straight-line distance from the fixed hospital coordinate to the selected location.</p>
+<p>It does not calculate driving time or a road route.</p>
+</div></details>
+<details class="section level-2" id="presentation-guide-discrepancy" open><summary><span>Presentation-guide discrepancy</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The pitch guide describes radius friction rings at 10 km, 25 km, and 40+ km. Those rings are not implemented in the current <code>MapAddressPicker</code> component. The current map shows markers, tiles, selected location, address/search results, and a computed distance.</p>
+<p>Seed patient distance values are stored in the data and are not always recomputed from their coordinates.</p>
+<hr>
+<h1 id="16-communication-and-twilio">16. Communication and Twilio</h1>
+</div></details>
+<details class="section level-2" id="contact-channels" open><summary><span>Contact channels</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The UI offers:</p>
+<ul>
+<li>Phone call.</li>
+<li>SMS.</li>
+<li>WhatsApp.</li>
+</ul>
+<p>The backend sends all channels through <code>sendNotification(...)</code>, but provider behavior differs.</p>
+</div></details>
+<details class="section level-2" id="actual-provider-behavior" open><summary><span>Actual provider behavior</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<div class="table-wrap"><table><thead><tr><th>Channel</th><th>Current behavior</th></tr></thead><tbody><tr><td>SMS with complete Twilio credentials</td><td>Attempts live Twilio Messages API call</td></tr><tr><td>SMS without credentials</td><td>Demo/simulated mode</td></tr><tr><td>SMS with Twilio error</td><td>Demo fallback</td></tr><tr><td>Phone call</td><td>Always simulated in current code</td></tr><tr><td>WhatsApp</td><td>Always simulated in current code</td></tr></tbody></table></div>
+<p>The code does not integrate Twilio Voice or WhatsApp APIs.</p>
+</div></details>
+<details class="section level-2" id="what-is-recorded" open><summary><span>What is recorded?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Each notification receives:</p>
+<ul>
+<li>Notification id.</li>
+<li>Patient id.</li>
+<li>Channel.</li>
+<li>Destination.</li>
+<li>Message content.</li>
+<li>Status.</li>
+<li>Provider label.</li>
+<li>Demo/live flag.</li>
+<li>Timestamp.</li>
+</ul>
+<p>The associated intervention and audit record are also created by the contact workflow.</p>
+</div></details>
+<details class="section level-2" id="demo-steps" open><summary><span>Demo steps</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<ol>
+<li>Open a patient from the Risk Queue or Patient Directory.</li>
+<li>Choose <strong>Contact Patient</strong>.</li>
+<li>Select SMS or phone.</li>
+<li>Review the generated message.</li>
+<li>Submit.</li>
+<li>Point out the demo-mode or live-mode result.</li>
+<li>Open the intervention page to show the saved operational status.</li>
+</ol>
+<p>Do not say that a real SMS was sent unless valid Twilio credentials were configured and the response says live Twilio succeeded.</p>
+<hr>
+<h1 id="17-audit-logging-and-csv-export">17. Audit Logging and CSV Export</h1>
+</div></details>
+<details class="section level-2" id="audit-events" open><summary><span>Audit events</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The code logs many write and workflow actions, including:</p>
+<ul>
+<li>User login.</li>
+<li>Staff registration.</li>
+<li>Staff deletion.</li>
+<li>Patient enrollment.</li>
+<li>Patient updates.</li>
+<li>Analyzer processing.</li>
+<li>Patient contact.</li>
+<li>Intervention creation.</li>
+<li>Intervention status update.</li>
+<li>Scoring configuration changes.</li>
+<li>Demo reset.</li>
+</ul>
+</div></details>
+<details class="section level-2" id="audit-screen-access" open><summary><span>Audit screen/access</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The frontend calls:</p>
+<pre><code class="language-text">GET /api/audit-logs</code></pre>
+<p>The API returns recent audit records. Some UI areas also show audit-related information through patient/intervention context.</p>
+</div></details>
+<details class="section level-2" id="what-is-not-logged" open><summary><span>What is not logged?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The current code does not log every read. Dashboard views, assistant questions, CSV exports, and most list reads are not automatically audit events.</p>
+<p>The audit table is not immutable in a database-enforced sense. Demo reset deletes and recreates data, including audit logs. Do not describe it as tamper-proof or immutable without additional controls.</p>
+</div></details>
+<details class="section level-2" id="csv-export" open><summary><span>CSV export</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The Risk Queue’s export action calls:</p>
+<pre><code class="language-text">GET /api/export/csv</code></pre>
+<p>The export includes up to 1,000 patients with:</p>
+<ul>
+<li>Rank.</li>
+<li>Patient id.</li>
+<li>Name.</li>
+<li>Age.</li>
+<li>Risk score.</li>
+<li>Risk level.</li>
+<li>Missed visits.</li>
+<li>Distance.</li>
+<li>Attendance rate.</li>
+<li>Next follow-up.</li>
+<li>Immediate action.</li>
+<li>Intervention status.</li>
+</ul>
+<p>The endpoint is authenticated.</p>
+<hr>
+<h1 id="18-presentation-claims-compared-with-code">18. Presentation Claims Compared with Code</h1>
+<p>This section should be read before presenting the project to judges.</p>
+<div class="table-wrap"><table><thead><tr><th>Presentation claim</th><th>Actual status</th></tr></thead><tbody><tr><td>Predict -&gt; Explain -&gt; Rank -&gt; Intervene</td><td>Implemented as the main product workflow</td></tr><tr><td>Deterministic six-factor scoring</td><td>Implemented in <code>scoringEngine.ts</code></td></tr><tr><td>Priya Patel / <code>P-1042</code> at 83</td><td>Implemented in canonical seed data with current defaults</td></tr><tr><td>Telehealth reduces Priya from 83 to 64</td><td>Implemented as a local hypothetical simulator scenario</td></tr><tr><td>Gemini assistant</td><td>Implemented with optional Gemini and deterministic fallback</td></tr><tr><td>Current Gemini model <code>gemini-3.6-flash</code></td><td>Implemented in <code>server.ts</code></td></tr><tr><td>Leaflet and OpenStreetMap map</td><td>Implemented in <code>MapAddressPicker.tsx</code></td></tr><tr><td>Nominatim address search</td><td>Implemented in map picker</td></tr><tr><td>Radius rings</td><td>Not implemented</td></tr><tr><td>Live telehealth scheduling/video</td><td>Not implemented; represented as a hypothetical or intervention label</td></tr><tr><td>Live Twilio SMS</td><td>Implemented only when credentials exist; otherwise demo mode</td></tr><tr><td>Live phone calls and WhatsApp</td><td>Not implemented; simulated</td></tr><tr><td>PostgreSQL persistence</td><td>Implemented through <code>pg</code> and Render <code>DATABASE_URL</code></td></tr><tr><td>PostgreSQL 18 everywhere</td><td>Not accurate; Render version is managed, Docker Compose uses PostgreSQL 16, local embedded dependency is PostgreSQL 18 beta</td></tr><tr><td>Vercel serverless deployment</td><td>Outdated; Vercel files/wrappers were removed and Render is current</td></tr><tr><td>Docker deployment</td><td>Implemented as a separate container path</td></tr><tr><td>Every action is RBAC protected</td><td>Not accurate; only some server routes enforce role-specific access</td></tr><tr><td>Immutable audit trail</td><td>Overstated; audit rows can be deleted by demo reset and there is no immutability mechanism</td></tr><tr><td>HIPAA/DPDPA/ABDM compliance</td><td>Not proven by code; no full compliance controls are implemented</td></tr><tr><td>ROI and no-show reduction metrics</td><td>Demo/presentation metrics; not calculated from validated outcomes</td></tr><tr><td>100% PHI removal from Gemini requests</td><td>Not guaranteed; patient context can include name, code, age, distance, attendance, and reasons</td></tr><tr><td>EMR/FHIR connectors</td><td>Roadmap / not currently implemented</td></tr><tr><td>IVR voice bot</td><td>Roadmap / not currently implemented</td></tr><tr><td>ASHA mobile app</td><td>Roadmap / not currently implemented</td></tr><tr><td>Java backend architecture</td><td>Presentation/demo source only; the active backend is TypeScript/Express</td></tr></tbody></table></div>
+</div></details>
+<details class="section level-2" id="claims-to-avoid" open><summary><span>Claims to avoid</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Do not say:</p>
+<ul>
+<li>“This is a clinically validated prediction model.”</li>
+<li>“An 83 score means an 83% probability.”</li>
+<li>“The system is HIPAA compliant because it uses JWT.”</li>
+<li>“Every patient action is fully RBAC protected.”</li>
+<li>“Every message is sent live through Twilio.”</li>
+<li>“Telehealth sessions are created by the app.”</li>
+<li>“The map contains implemented radius rings.”</li>
+<li>“The ROI numbers were measured by this application.”</li>
+<li>“The current deployment is Vercel.”</li>
+</ul>
+<p>Use:</p>
+<ul>
+<li>“Explainable operational risk score.”</li>
+<li>“Synthetic/demo data.”</li>
+<li>“Optional Gemini integration with deterministic fallback.”</li>
+<li>“Twilio SMS when configured; simulated channels otherwise.”</li>
+<li>“Render web service with managed PostgreSQL.”</li>
+</ul>
+<hr>
+<h1 id="19-three-minute-demo-script">19. Three-Minute Demo Script</h1>
+<p>This sequence follows the supplied presentation guide while matching the current UI.</p>
+</div></details>
+<details class="section level-2" id="0-00-0-30-login" open><summary><span>0:00-0:30: Login</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p><strong>Action:</strong> Open the app and log in as <code>admin@caretrack.in</code> with <code>password123</code>, or use the quick admin login control.</p>
+<p><strong>Say:</strong></p>
+<blockquote><p>We begin with a role-aware hospital operations workspace. The user signs in through the Express API, receives a JWT, and the browser loads the authenticated dashboard. This is a demo account and not a production credential.</p></blockquote>
+</div></details>
+<details class="section level-2" id="0-30-1-00-dashboard" open><summary><span>0:30-1:00: Dashboard</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p><strong>Action:</strong> Point to the KPI cards, top-risk table, chart area, and Priority Queue button.</p>
+<p><strong>Say:</strong></p>
+<blockquote><p>The dashboard summarizes the outpatient cohort and directs staff toward the highest-priority follow-ups. These values are based on the seeded synthetic dataset and server calculations, with some presentation fallback values in the UI.</p></blockquote>
+</div></details>
+<details class="section level-2" id="1-00-1-35-risk-queue" open><summary><span>1:00-1:35: Risk Queue</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p><strong>Action:</strong> Open <strong>Priority Risk Queue</strong>. Filter to high risk or next seven days. Search for <code>P-1042</code> if needed.</p>
+<p><strong>Say:</strong></p>
+<blockquote><p>The queue turns the score into an operational order of work. Staff can search, filter by tier and due window, sort by risk, and open a patient for explanation and action.</p></blockquote>
+</div></details>
+<details class="section level-2" id="1-35-2-00-priya-patel-details" open><summary><span>1:35-2:00: Priya Patel details</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p><strong>Action:</strong> Open Priya Patel, then show the score, risk factors, appointment timeline, and recommended action.</p>
+<p><strong>Say:</strong></p>
+<blockquote><p>Priya Patel is the canonical demo patient. Her record contains five missed visits, 42 kilometers of travel distance, 58% attendance, a 60-day cadence, and 12 months of treatment. With the default six-factor formula, those values produce 83, or CRITICAL. This is an operational score, not a medical diagnosis or probability.</p></blockquote>
+</div></details>
+<details class="section level-2" id="2-00-2-20-what-if-simulator" open><summary><span>2:00-2:20: What-If simulator</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p><strong>Action:</strong> Click <strong>Simulate Telehealth</strong> and point to the score change.</p>
+<p><strong>Say:</strong></p>
+<blockquote><p>The simulator is hypothetical and runs locally in the browser. It changes effective travel distance to zero and recalculates the score. Priya’s displayed scenario moves from 83 to 64, a 19-point reduction. The application has not booked a video visit; it has shown the potential effect of removing travel friction.</p></blockquote>
+</div></details>
+<details class="section level-2" id="2-20-2-40-contact-workflow" open><summary><span>2:20-2:40: Contact workflow</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p><strong>Action:</strong> Open <strong>Contact Patient</strong>, choose SMS or phone, review the draft, submit.</p>
+<p><strong>Say:</strong></p>
+<blockquote><p>The coordinator can now record an outreach attempt. With Twilio credentials, SMS can call the Twilio Messages API. Without them, the application records a transparent demo-mode notification. Phone and WhatsApp are simulated in the current code.</p></blockquote>
+</div></details>
+<details class="section level-2" id="2-40-3-00-gemini-and-audit" open><summary><span>2:40-3:00: Gemini and audit</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p><strong>Action:</strong> Open the AI assistant and ask <code>Why is patient P-1042 high risk?</code>. Then show the intervention or audit area.</p>
+<p><strong>Say:</strong></p>
+<blockquote><p>The assistant is constrained to operational questions and uses the current <code>gemini-3.6-flash</code> model when a Gemini key is configured. If Gemini is unavailable, deterministic fallback text keeps the demo usable. The contact and intervention workflow records operational history in PostgreSQL.</p></blockquote>
+<hr>
+<h1 id="20-longer-presentation-scripts">20. Longer Presentation Scripts</h1>
+</div></details>
+<details class="section level-2" id="slide-1-title-and-vision" open><summary><span>Slide 1: Title and vision</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Say:</p>
+<blockquote><p>CareTrack AI is an explainable outpatient follow-up operations platform. Its workflow is Predict, Explain, Rank, Intervene, and then record the outcome. It is built as a React and Express application with PostgreSQL persistence and optional external services.</p></blockquote>
+<p>Do not display “Vercel Ready” as a current deployment badge. The current deployment target is Render.</p>
+</div></details>
+<details class="section level-2" id="slide-2-problem" open><summary><span>Slide 2: Problem</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Say:</p>
+<blockquote><p>The application addresses the operational problem of missed follow-up appointments and the friction behind them. The repository models this with missed visits, distance, attendance, cadence, duration, age, transport, and language fields. External no-show and financial statistics belong to the presentation context, not to this application’s measured output.</p></blockquote>
+</div></details>
+<details class="section level-2" id="slide-3-solution" open><summary><span>Slide 3: Solution</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Say:</p>
+<blockquote><p>The solution connects a transparent score to a queue and a workflow. The user can move from risk identification to factor explanation, hypothetical simulation, contact, intervention status, and audit record without leaving the main workspace.</p></blockquote>
+</div></details>
+<details class="section level-2" id="slide-4-scoring-engine" open><summary><span>Slide 4: Scoring engine</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Say:</p>
+<blockquote><p>The engine has six bounded factors with default caps adding to 100. The code uses explicit formulas. The current implementation’s numeric thresholds should be explained accurately: distance reaches its full numeric contribution at 45 kilometers, cadence at 90 days, duration at 24 months, and age scoring begins above 50 or below 18 even though the explanatory text emphasizes 65 and 12.</p></blockquote>
+</div></details>
+<details class="section level-2" id="slide-5-hero-patient" open><summary><span>Slide 5: Hero patient</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Say:</p>
+<blockquote><p>Priya Patel is a synthetic canonical patient. Her 83 score is reproducible from the current seed data and default scoring configuration. The telehealth scenario is a hypothetical distance-zero simulation, not a live telehealth booking.</p></blockquote>
+</div></details>
+<details class="section level-2" id="slide-6-gis" open><summary><span>Slide 6: GIS</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Say:</p>
+<blockquote><p>The map picker uses Leaflet tiles, Nominatim search, local Indian place presets, browser location, draggable markers, and Haversine distance from a fixed reference hospital. Radius rings and route-driving distance are not currently implemented.</p></blockquote>
+</div></details>
+<details class="section level-2" id="slide-7-gemini" open><summary><span>Slide 7: Gemini</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Say:</p>
+<blockquote><p>Gemini is an optional operations assistant. It can explain risk drivers and summarize operational counts. Its prompt prohibits diagnosis and prescriptions. The deterministic engine remains responsible for the actual score. When no key is configured or Gemini fails, the backend uses keyword-based fallback responses.</p></blockquote>
+</div></details>
+<details class="section level-2" id="slide-8-architecture" open><summary><span>Slide 8: Architecture</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Say:</p>
+<blockquote><p>The active architecture is one Node process: Vite builds the client, esbuild bundles the Express server, and <code>npm start</code> runs the compiled server. Render provides the web service and managed PostgreSQL connection. Docker Compose is an alternative local/container path, not the Render runtime.</p></blockquote>
+</div></details>
+<details class="section level-2" id="slide-9-roles-and-governance" open><summary><span>Slide 9: Roles and governance</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Say:</p>
+<blockquote><p>The UI exposes five roles and uses JWT authentication. Settings visibility is restricted in the frontend, and scoring configuration updates are admin-protected on the backend. Other write routes need additional server-side role hardening before claiming complete enterprise RBAC.</p></blockquote>
+</div></details>
+<details class="section level-2" id="slide-10-impact" open><summary><span>Slide 10: Impact</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Say:</p>
+<blockquote><p>The application shows operational impact-style charts and demo KPIs. These are not a validated ROI model or a measured hospital outcome study. A real impact evaluation would require production baseline data, controlled intervention definitions, and outcome measurement.</p></blockquote>
+</div></details>
+<details class="section level-2" id="slide-11-differentiation" open><summary><span>Slide 11: Differentiation</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Say:</p>
+<blockquote><p>The strongest defensible differentiator is the combination of a transparent factor score, a ranked work queue, a hypothetical simulator, and an action record. Avoid saying that the current system is a complete replacement for an EHR or a production clinical AI platform.</p></blockquote>
+</div></details>
+<details class="section level-2" id="slide-12-roadmap" open><summary><span>Slide 12: Roadmap</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The presentation guide’s FHIR/EMR connectors, IVR voice bot, and ASHA mobile application are roadmap items. They are not implemented in this repository.</p>
+<hr>
+<h1 id="21-production-deployment">21. Production Deployment</h1>
+</div></details>
+<details class="section level-2" id="render-blueprint" open><summary><span>Render Blueprint</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The repository contains <code>render.yaml</code>.</p>
+<p>It declares:</p>
+<pre><code class="language-yaml">services:
+  - type: web
+    runtime: node
+    buildCommand: npm ci &amp;&amp; npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+
+databases:
+  - name: caretrack-db</code></pre>
+<p>Render should create the database and inject its connection string into the web service’s <code>DATABASE_URL</code> variable.</p>
+</div></details>
+<details class="section level-2" id="deployment-steps" open><summary><span>Deployment steps</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<ol>
+<li>Push the repository to GitHub.</li>
+<li>Open Render.</li>
+<li>Choose <strong>New</strong> and <strong>Blueprint</strong>.</li>
+<li>Connect the repository and select the <code>main</code> branch.</li>
+<li>Let Render detect <code>render.yaml</code>.</li>
+<li>Review the web service and PostgreSQL database resources.</li>
+<li>Add optional <code>GEMINI<em>API</em>KEY</code> if live Gemini is required.</li>
+<li>Add Twilio variables only if live SMS is required.</li>
+<li>Deploy.</li>
+<li>Check the Render logs for database connection and seed messages.</li>
+<li>Open the generated service URL.</li>
+<li>Check <code>/api/health</code>.</li>
+<li>Log in with a demo account only for demonstration.</li>
+</ol>
+</div></details>
+<details class="section level-2" id="expected-production-startup" open><summary><span>Expected production startup</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>A healthy startup should:</p>
+<ol>
+<li>Start the Node process.</li>
+<li>Read <code>DATABASE_URL</code>.</li>
+<li>Connect to PostgreSQL.</li>
+<li>Create missing tables/indexes.</li>
+<li>Seed the database if it has no patients.</li>
+<li>Start listening on Render’s <code>PORT</code>.</li>
+<li>Pass the <code>/api/health</code> check.</li>
+</ol>
+</div></details>
+<details class="section level-2" id="production-checks" open><summary><span>Production checks</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<pre><code class="language-bash">npm ci
+npm run lint
+npm run build
+npm start</code></pre>
+<p>On Render, do not rely on <code>.pgdata</code>. The durable database should be the managed PostgreSQL resource.</p>
+</div></details>
+<details class="section level-2" id="docker-deployment" open><summary><span>Docker deployment</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The Docker path is separate:</p>
+<pre><code class="language-bash">docker build -t caretrack-ai .
+docker run --env-file .env -p 3000:3000 caretrack-ai</code></pre>
+<p>For Compose:</p>
+<pre><code class="language-bash">docker compose up --build</code></pre>
+<p>The Compose file uses a local PostgreSQL service and has its own credentials. Keep those values out of public production environments.</p>
+<hr>
+<h1 id="22-safe-modification-guide">22. Safe Modification Guide</h1>
+</div></details>
+<details class="section level-2" id="before-changing-anything" open><summary><span>Before changing anything</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<ol>
+<li>Read the relevant component and its API method.</li>
+<li>Search for all usages of the symbol.</li>
+<li>Check shared types.</li>
+<li>Check the corresponding Express route.</li>
+<li>Check the database repository method.</li>
+<li>Run the narrowest useful test or type check before editing.</li>
+<li>Inspect <code>git status</code> so existing work is not overwritten.</li>
+</ol>
+</div></details>
+<details class="section level-2" id="common-change-locations" open><summary><span>Common change locations</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<div class="table-wrap"><table><thead><tr><th>Desired change</th><th>Start here</th><th>Also inspect</th></tr></thead><tbody><tr><td>Change score formula</td><td><code>src/services/scoringEngine.ts</code></td><td><code>RiskSimulator</code>, server prediction paths, Settings</td></tr><tr><td>Add a risk factor</td><td><code>scoringEngine.ts</code></td><td><code>types.ts</code>, UI factor displays, seed/demo data</td></tr><tr><td>Change patient fields</td><td><code>types.ts</code>, <code>db.ts</code></td><td>SQL schema, mapper, forms, API route</td></tr><tr><td>Add an API endpoint</td><td><code>server.ts</code></td><td><code>src/services/api.ts</code>, calling page, auth, DB method</td></tr><tr><td>Change dashboard KPI</td><td><code>DashboardPage.tsx</code>, <code>db.ts</code></td><td><code>AnalyticsPage</code>, API response type</td></tr><tr><td>Change Gemini model/prompt</td><td><code>server.ts</code></td><td><code>package.json</code>, env docs, assistant drawer</td></tr><tr><td>Change Twilio behavior</td><td><code>notificationService.ts</code></td><td><code>ContactPatientModal</code>, notification DB method</td></tr><tr><td>Change map behavior</td><td><code>MapAddressPicker.tsx</code></td><td><code>PatientsPage</code>, seed city data, external service assumptions</td></tr><tr><td>Add navigation page</td><td><code>App.tsx</code>, <code>Sidebar.tsx</code>, <code>AppContext.tsx</code></td><td>page component and access rules</td></tr><tr><td>Change staff workflow</td><td><code>SettingsPage.tsx</code>, <code>AuthContext.tsx</code></td><td>auth endpoints, password handling, role checks</td></tr><tr><td>Change deployment</td><td><code>render.yaml</code>, <code>Dockerfile</code>, <code>package.json</code></td><td>environment docs and health endpoint</td></tr></tbody></table></div>
+</div></details>
+<details class="section level-2" id="do-not-make-these-assumptions" open><summary><span>Do not make these assumptions</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<ul>
+<li>A UI-hidden action is automatically secure. Verify backend authorization.</li>
+<li>A displayed KPI is necessarily calculated from live data.</li>
+<li>A notification with “SMS” necessarily went through Twilio.</li>
+<li>A telehealth label means a video session exists.</li>
+<li>A risk score is a probability.</li>
+<li>A seeded patient date is fixed; several dates are generated relative to runtime date.</li>
+<li>A database fallback is durable.</li>
+<li>A prompt instruction alone provides compliance.</li>
+</ul>
+</div></details>
+<details class="section level-2" id="safe-feature-change-pattern" open><summary><span>Safe feature change pattern</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>For a backend-backed feature:</p>
+<pre><code class="language-text">Shared type
+  -&gt; database schema/repository
+  -&gt; Express route
+  -&gt; frontend api.ts method
+  -&gt; context/page/component
+  -&gt; focused test or endpoint check
+  -&gt; full type/build check</code></pre>
+<p>Keep each change narrow and preserve existing response shapes unless a deliberate API migration is planned.</p>
+<hr>
+<h1 id="23-troubleshooting">23. Troubleshooting</h1>
+</div></details>
+<details class="section level-2" id="npm-start-says-package-json-is-missing" open><summary><span><code>npm start</code> says package.json is missing</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Make sure the shell is in the project directory:</p>
+<pre><code class="language-powershell">Set-Location C:\d_backup\PROJECTS\CareTrackAi\NextEra---ASA-Trinity
+npm start</code></pre>
+<p>Or use an explicit prefix:</p>
+<pre><code class="language-powershell">npm.cmd --prefix &quot;C:\d_backup\PROJECTS\CareTrackAi\NextEra---ASA-Trinity&quot; start</code></pre>
+</div></details>
+<details class="section level-2" id="port-3000-is-already-in-use" open><summary><span>Port 3000 is already in use</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Find the process:</p>
+<pre><code class="language-powershell">Get-NetTCPConnection -LocalPort 3000</code></pre>
+<p>Stop only the process you recognize, or set another local <code>PORT</code> in <code>.env</code>.</p>
+</div></details>
+<details class="section level-2" id="embedded-postgresql-startup-is-slow" open><summary><span>Embedded PostgreSQL startup is slow</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The first run downloads/initializes a local database cluster. Wait for the server to print that PostgreSQL is ready and that the application is listening.</p>
+</div></details>
+<details class="section level-2" id="pgdata-is-not-empty-database-restarts-strangely" open><summary><span><code>.pgdata</code> is not empty / database restarts strangely</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>This is a local embedded database issue. Stop the old Node/PostgreSQL process cleanly. Do not delete <code>.pgdata</code> if you need its local data. If it is disposable demo data, stop all related processes and remove <code>.pgdata</code>, then restart.</p>
+</div></details>
+<details class="section level-2" id="production-says-database-url-must-be-configured" open><summary><span>Production says <code>DATABASE_URL must be configured</code></span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Render did not inject the database connection string. Confirm:</p>
+<ol>
+<li>The PostgreSQL resource exists.</li>
+<li>The web service is linked to it in Render.</li>
+<li>The environment variable is named exactly <code>DATABASE_URL</code>.</li>
+<li>The service was redeployed after configuration.</li>
+</ol>
+</div></details>
+<details class="section level-2" id="postgresql-connection-fails" open><summary><span>PostgreSQL connection fails</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Check:</p>
+<ul>
+<li>Connection string format.</li>
+<li>SSL requirements.</li>
+<li>Database availability.</li>
+<li>Render internal/external connection choice.</li>
+<li>Pool limit.</li>
+<li>Service logs.</li>
+</ul>
+<p>The application uses SSL for non-local <code>DATABASE_URL</code> connections with <code>rejectUnauthorized: false</code>. Review this policy before a regulated production deployment.</p>
+</div></details>
+<details class="section level-2" id="login-fails" open><summary><span>Login fails</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Check:</p>
+<ul>
+<li>API is running.</li>
+<li>Database initialized and seed users exist.</li>
+<li>Email is one of the seed accounts.</li>
+<li>Password is <code>password123</code> for demo accounts.</li>
+<li>Browser local storage is not holding a stale token.</li>
+</ul>
+<p>Clear <code>caretrack<em>token</code> and <code>caretrack</em>user</code> in browser storage when testing a fresh session.</p>
+</div></details>
+<details class="section level-2" id="dashboard-is-blank-or-shows-fallback-values" open><summary><span>Dashboard is blank or shows fallback values</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Open browser developer tools and inspect <code>/api/dashboard/summary</code>, <code>/api/settings/config</code>, and <code>/api/dashboard/trends</code>. Confirm:</p>
+<ul>
+<li>The JWT exists.</li>
+<li>The API returns <code>success: true</code>.</li>
+<li>The database is initialized.</li>
+<li>The response shape matches <code>src/services/api.ts</code>.</li>
+</ul>
+</div></details>
+<details class="section level-2" id="gemini-assistant-shows-fallback-text" open><summary><span>Gemini assistant shows fallback text</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>That is expected when:</p>
+<ul>
+<li><code>GEMINI<em>API</em>KEY</code> is absent.</li>
+<li>The key is a placeholder.</li>
+<li>Gemini rejects the request.</li>
+<li>The network request fails.</li>
+</ul>
+<p>Check server logs for <code>[Gemini Assistant Error]</code>. The current request uses <code>gemini-3.6-flash</code>.</p>
+</div></details>
+<details class="section level-2" id="twilio-says-demo-mode" open><summary><span>Twilio says demo mode</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Demo mode is expected unless all three variables are configured:</p>
+<ul>
+<li><code>TWILIO<em>ACCOUNT</em>SID</code>.</li>
+<li><code>TWILIO<em>AUTH</em>TOKEN</code>.</li>
+<li><code>TWILIO<em>PHONE</em>NUMBER</code>.</li>
+</ul>
+<p>Only SMS attempts the live Twilio API. Phone and WhatsApp remain simulated.</p>
+</div></details>
+<details class="section level-2" id="map-search-does-not-return-results" open><summary><span>Map search does not return results</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Map search depends on Nominatim network access. Try:</p>
+<ul>
+<li>A local city preset.</li>
+<li>A known Indian locality.</li>
+<li>A map click.</li>
+<li>Browser GPS permission.</li>
+</ul>
+<p>Remember that the map calculates straight-line distance, not driving distance.</p>
+</div></details>
+<details class="section level-2" id="typescript-errors-after-a-change" open><summary><span>TypeScript errors after a change</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Run:</p>
+<pre><code class="language-bash">npm run lint</code></pre>
+<p>Read the first error and follow its import/type path. Avoid changing unrelated files to silence errors.</p>
+</div></details>
+<details class="section level-2" id="render-health-check-fails" open><summary><span>Render health check fails</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Test locally:</p>
+<pre><code class="language-text">http://localhost:3000/api/health</code></pre>
+<p>Then verify:</p>
+<ul>
+<li>Render is using <code>npm run build</code>.</li>
+<li>Render is using <code>npm start</code>.</li>
+<li>The service listens on <code>0.0.0.0</code>.</li>
+<li>The database initialization completes.</li>
+<li>Render health check path is <code>/api/health</code>.</li>
+</ul>
+<hr>
+<h1 id="24-judge-q-a">24. Judge Q&amp;A</h1>
+</div></details>
+<details class="section level-2" id="why-deterministic-scoring-instead-of-deep-learning" open><summary><span>Why deterministic scoring instead of deep learning?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Accurate answer:</p>
+<blockquote><p>This prototype prioritizes transparency and operational explainability. Each score is built from six explicit bounded factors, so staff can inspect why a patient moved up the queue. It is not presented as a validated clinical prediction probability. A future production model could be evaluated against outcomes while retaining explanation and governance requirements.</p></blockquote>
+</div></details>
+<details class="section level-2" id="does-the-score-predict-readmission" open><summary><span>Does the score predict readmission?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>No. It scores follow-up attendance friction and prioritization. The repository does not implement a readmission model or validate a readmission relationship.</p>
+</div></details>
+<details class="section level-2" id="what-happens-if-postgresql-is-unavailable" open><summary><span>What happens if PostgreSQL is unavailable?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The code contains local fallback behavior, including embedded PostgreSQL and an in-memory dataset outside the production <code>DATABASE_URL</code> requirement. In-memory data is not durable and should not be described as a production database outage solution without additional reliability design.</p>
+</div></details>
+<details class="section level-2" id="is-the-data-real" open><summary><span>Is the data real?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>No. The repository seeds synthetic/demo patients and accounts. Priya Patel is a canonical synthetic demonstration patient.</p>
+</div></details>
+<details class="section level-2" id="is-the-system-hipaa-or-dpdpa-compliant" open><summary><span>Is the system HIPAA or DPDPA compliant?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Do not claim that based on this code. JWT authentication and audit records are useful building blocks, but the repository does not demonstrate complete encryption, consent, tenant isolation, data retention, PHI controls, secure secret rotation, or formal compliance certification.</p>
+</div></details>
+<details class="section level-2" id="is-gemini-making-the-risk-decision" open><summary><span>Is Gemini making the risk decision?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>No. The deterministic scoring engine calculates the score. Gemini is an optional operational assistant that summarizes information and answers constrained questions. A deterministic fallback exists.</p>
+</div></details>
+<details class="section level-2" id="what-if-gemini-is-unavailable" open><summary><span>What if Gemini is unavailable?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The server catches Gemini errors and returns keyword-based deterministic operational responses. This keeps the demo functional but is not equivalent to Gemini quality.</p>
+</div></details>
+<details class="section level-2" id="is-telehealth-integrated" open><summary><span>Is telehealth integrated?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>No. The application can simulate a distance-zero scenario and record a teleconsultation-related intervention or message. It does not create a video meeting, book a telehealth appointment, or integrate with an EHR scheduler.</p>
+</div></details>
+<details class="section level-2" id="is-twilio-fully-integrated" open><summary><span>Is Twilio fully integrated?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Only partially. SMS can use the Twilio Messages API when credentials exist. Phone calls and WhatsApp are simulated. Errors fall back to demo recording.</p>
+</div></details>
+<details class="section level-2" id="is-the-map-a-routing-system" open><summary><span>Is the map a routing system?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>No. It is an address/location picker using Leaflet, OpenStreetMap, Nominatim, presets, GPS, and straight-line Haversine distance. It has no road routing or radius rings.</p>
+</div></details>
+<details class="section level-2" id="what-does-render-deploy" open><summary><span>What does Render deploy?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>Render runs the compiled Express server, which serves the React build and the API. The same service uses the Render PostgreSQL connection from <code>DATABASE_URL</code>.</p>
+</div></details>
+<details class="section level-2" id="what-is-the-strongest-demo-point" open><summary><span>What is the strongest demo point?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The strongest defensible flow is:</p>
+<pre><code class="language-text">Priya Patel -&gt; explain 83 -&gt; simulate telehealth -&gt; show 64 -&gt; record contact -&gt; show intervention/audit</code></pre>
+<p>It demonstrates a complete chain without claiming that the simulator itself performed a real clinical intervention.</p>
+</div></details>
+<details class="section level-2" id="what-is-still-roadmap" open><summary><span>What is still roadmap?</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<p>The presentation roadmap items are not currently implemented:</p>
+<ul>
+<li>EMR/FHIR connectors.</li>
+<li>Epic/Cerner integrations.</li>
+<li>ABDM integration.</li>
+<li>Multilingual IVR voice bot.</li>
+<li>ASHA/community-worker mobile app.</li>
+<li>Real video/telehealth scheduling.</li>
+<li>Full production compliance controls.</li>
+</ul>
+<hr>
+<h1 id="25-final-beginner-checklist">25. Final Beginner Checklist</h1>
+</div></details>
+<details class="section level-2" id="before-a-demo" open><summary><span>Before a demo</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<ul>
+<li>[ ] Run <code>npm install</code> or <code>npm ci</code>.</li>
+<li>[ ] Confirm the server starts.</li>
+<li>[ ] Confirm <code>/api/health</code> returns healthy.</li>
+<li>[ ] Confirm login works.</li>
+<li>[ ] Confirm the dashboard loads.</li>
+<li>[ ] Search for <code>P-1042</code>.</li>
+<li>[ ] Confirm Priya’s score is 83 with default configuration.</li>
+<li>[ ] Confirm the simulator shows 64 when telehealth is active.</li>
+<li>[ ] Decide whether the demo uses real Gemini or fallback mode.</li>
+<li>[ ] Decide whether the demo uses live SMS or Twilio demo mode.</li>
+<li>[ ] Do not claim unsupported compliance, ROI, Vercel, radius rings, or live telehealth.</li>
+</ul>
+</div></details>
+<details class="section level-2" id="before-changing-code" open><summary><span>Before changing code</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<ul>
+<li>[ ] Check <code>git status</code>.</li>
+<li>[ ] Read the owning component/service.</li>
+<li>[ ] Search all symbol usages.</li>
+<li>[ ] Check the API contract.</li>
+<li>[ ] Check the database method and schema.</li>
+<li>[ ] Keep secrets out of source and <code>VITE_*</code> variables.</li>
+<li>[ ] Run <code>npm run lint</code>.</li>
+<li>[ ] Run <code>npm run build</code>.</li>
+<li>[ ] Test the affected workflow.</li>
+<li>[ ] Review <code>git diff</code>.</li>
+</ul>
+</div></details>
+<details class="section level-2" id="before-deploying-render" open><summary><span>Before deploying Render</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<ul>
+<li>[ ] <code>render.yaml</code> is present.</li>
+<li>[ ] PostgreSQL resource is created.</li>
+<li>[ ] <code>DATABASE_URL</code> is linked.</li>
+<li>[ ] <code>JWT_SECRET</code> is generated/configured.</li>
+<li>[ ] Optional Gemini/Twilio variables are added only when needed.</li>
+<li>[ ] Build command is <code>npm ci &amp;&amp; npm run build</code>.</li>
+<li>[ ] Start command is <code>npm start</code>.</li>
+<li>[ ] Health check is <code>/api/health</code>.</li>
+<li>[ ] Logs show successful PostgreSQL connection.</li>
+<li>[ ] The deployed URL opens the React app.</li>
+<li>[ ] Login and one authenticated API request succeed.</li>
+</ul>
+</div></details>
+<details class="section level-2" id="one-sentence-project-summary" open><summary><span>One-sentence project summary</span><span class="summary-hint">Open section</span></summary><div class="section-content">
+<blockquote><p>CareTrack AI is a synthetic-data, explainable outpatient follow-up operations prototype that uses a deterministic six-factor score to prioritize patients, explain barriers, simulate interventions, and record staff outreach through a React/Express/PostgreSQL application deployed on Render.</p></blockquote>
+</div></details></main>
+<footer>Generated from the repository's current CARETRACK_AI_COMPLETE_WALKTHROUGH.md. The Markdown remains the source of truth.</footer>
+</div>
+</body>
+</html>
