@@ -126,8 +126,8 @@ PostgreSQL automatically provisions schemas and seeds 1,000 outpatient records o
 
 1. **Dashboard Overview**: Inspect the executive overview showing 1,000 active patients, 185 high/critical risk cohort, 36 follow-ups due today, and 84% outreach success rate.
 2. **Prioritized Risk Queue**: Filter by **Due in Next 7 Days** and inspect patients ranked by risk score.
-3. **Hero Patient Deep-Dive (`P-1042`)**: Click on **Priya Patel (`P-1042`)**, a post-CABG patient living 42 km away with 5 missed visits and a Risk Score of **76/100 (HIGH)**.
-4. **What-If Simulation**: In the simulator, click **Offer Remote Telehealth** (reducing distance to 0 km). Watch the score drop live from 76 to 61 ($-15\text{ pts}$). Adjust the **Patient Age** and **Missed Appointments** sliders to observe live recalibration.
+3. **Hero Patient Deep-Dive (`P-1042`)**: Click on **Priya Patel (`P-1042`)**, a post-CABG patient living 42 km away with 5 missed visits and a Risk Score of **83/100 (CRITICAL)**.
+4. **What-If Simulation**: In the simulator, click **Offer Remote Telehealth** (reducing distance to 0 km). Watch the score drop live from 83 to 64 ($-19\text{ pts}$). Adjust the **Patient Age** and **Missed Appointments** sliders to observe live recalibration.
 5. **Close-the-Loop Outreach**: Click **Contact Patient**, select **SMS**, and click **Send Communication & Save**. Observe the transparent **`[Twilio Demo Mode] Simulated SMS successfully dispatched`** feedback and database record.
 6. **AI Assistant**: Open the clinical assistant (bottom-right) and ask *"Why is P-1042 high risk?"* to review instant clinical driver attribution.
 7. **Analytics Suite**: Review attendance trend curves, risk factor frequencies, and audit logging verifying hospital operational compliance.
