@@ -1,49 +1,49 @@
-import React, { useEffect, useState } from 'react';
-import { useApp } from '../context/AppContext';
-import { api } from '../services/api';
-import { Patient } from '../types';
-import { RiskGauge } from '../components/RiskGauge';
-import { RiskCard } from '../components/RiskCard';
-import { 
-  Users, 
-  AlertTriangle, 
-  Calendar, 
-  CheckCircle2, 
-  TrendingUp, 
-  ArrowRight, 
-  ShieldAlert, 
-  Clock, 
-  PhoneCall, 
-  Activity, 
+import React, { useEffect, useState } from "react";
+import { useApp } from "../context/AppContext";
+import { api } from "../services/api";
+import { Patient } from "../types";
+import { RiskGauge } from "../components/RiskGauge";
+import { RiskCard } from "../components/RiskCard";
+import {
+  Users,
+  AlertTriangle,
+  Calendar,
+  CheckCircle2,
+  TrendingUp,
+  ArrowRight,
+  ShieldAlert,
+  Clock,
+  PhoneCall,
+  Activity,
   MapPin,
   RefreshCw,
   Sparkles,
   HelpCircle,
   Zap,
-  Layers
-} from 'lucide-react';
-import { 
-  ResponsiveContainer, 
-  PieChart, 
-  Pie, 
-  Cell, 
-  Tooltip, 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  BarChart, 
-  Bar 
-} from 'recharts';
+  Layers,
+} from "lucide-react";
+import {
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  BarChart,
+  Bar,
+} from "recharts";
 
 export const DashboardPage: React.FC = () => {
-  const { 
-    summary, 
-    setCurrentPage, 
-    viewPatientDetails, 
-    setExplainModalPatient, 
-    setActionModalPatient, 
+  const {
+    summary,
+    setCurrentPage,
+    viewPatientDetails,
+    setExplainModalPatient,
+    setActionModalPatient,
     setInterventionModalPatient,
     refreshDashboard,
     setIsAiDrawerOpen,
@@ -57,7 +57,12 @@ export const DashboardPage: React.FC = () => {
   const loadDashboardData = React.useCallback(async () => {
     try {
       const [patientsRes, trendsRes] = await Promise.all([
-        api.getPatients({ riskLevel: 'HIGH', limit: 5, sortBy: 'riskScore', sortOrder: 'desc' }),
+        api.getPatients({
+          riskLevel: "HIGH",
+          limit: 5,
+          sortBy: "riskScore",
+          sortOrder: "desc",
+        }),
         api.getDashboardTrends(),
       ]);
       if (patientsRes.success) setTopHighRiskPatients(patientsRes.data);
@@ -80,37 +85,50 @@ export const DashboardPage: React.FC = () => {
     await Promise.all([refreshDashboard(), loadDashboardData()]);
   };
 
-  const highCount = summary?.highRiskPatients ?? (summary as any)?.highRiskCount ?? 186;
-  const mediumCount = summary?.mediumRiskPatients ?? (summary as any)?.mediumRiskCount ?? 422;
-  const lowCount = summary?.lowRiskPatients ?? (summary as any)?.lowRiskCount ?? 392;
+  const highCount =
+    summary?.highRiskPatients ?? (summary as any)?.highRiskCount ?? 186;
+  const mediumCount =
+    summary?.mediumRiskPatients ?? (summary as any)?.mediumRiskCount ?? 422;
+  const lowCount =
+    summary?.lowRiskPatients ?? (summary as any)?.lowRiskCount ?? 392;
   const totalCount = summary?.totalPatients ?? 1000;
-  const dueWeekCount = summary?.followUpsDueThisWeek ?? (summary as any)?.dueThisWeekCount ?? 24;
-  const completedInterventions = summary?.interventionsCompleted ?? (summary as any)?.completedInterventions ?? 78;
-  const pendingInterventions = summary?.interventionsPending ?? (summary as any)?.pendingInterventions ?? 34;
+  const dueWeekCount =
+    summary?.followUpsDueThisWeek ?? (summary as any)?.dueThisWeekCount ?? 24;
+  const completedInterventions =
+    summary?.interventionsCompleted ??
+    (summary as any)?.completedInterventions ??
+    78;
+  const pendingInterventions =
+    summary?.interventionsPending ??
+    (summary as any)?.pendingInterventions ??
+    34;
   const successRate = summary?.outreachSuccessRate ?? 91;
 
   const riskPieData = [
-    { name: 'High Risk (60-100)', value: highCount, color: '#e11d48' },
-    { name: 'Medium Risk (30-59)', value: mediumCount, color: '#f59e0b' },
-    { name: 'Low Risk (0-29)', value: lowCount, color: '#10b981' },
+    { name: "High Risk (60-100)", value: highCount, color: "#e11d48" },
+    { name: "Medium Risk (30-59)", value: mediumCount, color: "#f59e0b" },
+    { name: "Low Risk (0-29)", value: lowCount, color: "#10b981" },
   ];
 
   return (
-    <div className="space-y-6 pb-12 animate-in fade-in duration-200">
+    <div className="space-y-5 pb-12 animate-in fade-in duration-200">
       {/* Top Banner & Quick Context */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5 sm:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 font-bold text-xs">
+            <span className="px-2.5 py-0.5 rounded-sm bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs">
               Outpatient Intelligence
             </span>
-            <span className="text-xs text-slate-500 font-mono">Live Clinical Feed</span>
+            <span className="text-xs text-slate-500 font-mono">
+              Live Clinical Feed
+            </span>
           </div>
           <h1 className="text-2xl font-extrabold tracking-tight text-slate-800">
             Patient Follow-up Risk Dashboard
           </h1>
           <p className="text-xs text-slate-500 mt-1 max-w-2xl">
-            Prioritizing patients at risk of missing vital follow-up visits using explainable clinical AI and closed-loop staff outreach.
+            Prioritizing patients at risk of missing vital follow-up visits
+            using explainable clinical AI and closed-loop staff outreach.
           </p>
         </div>
 
@@ -119,15 +137,17 @@ export const DashboardPage: React.FC = () => {
           <button
             onClick={handleFullRefresh}
             disabled={isRefreshing}
-            className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+            className="clinical-button px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold uppercase tracking-wider active:scale-[0.98]"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
-            {isRefreshing ? 'Refreshing...' : 'Refresh'}
+            <RefreshCw
+              className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`}
+            />
+            {isRefreshing ? "Refreshing..." : "Refresh"}
           </button>
 
           <button
-            onClick={() => setCurrentPage('risk-queue')}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors shadow-sm shadow-blue-900/20"
+            onClick={() => setCurrentPage("risk-queue")}
+            className="clinical-button px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-bold uppercase tracking-wider shadow-sm shadow-blue-900/20 active:scale-[0.98]"
           >
             <AlertTriangle className="w-4 h-4" />
             Priority Queue ({highCount})
@@ -138,9 +158,9 @@ export const DashboardPage: React.FC = () => {
       {/* KPI Metric Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: High Risk Patients */}
-        <div 
-          onClick={() => setCurrentPage('risk-queue')}
-          className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-red-300 hover:shadow-md transition-all cursor-pointer group"
+        <div
+          onClick={() => setCurrentPage("risk-queue")}
+          className="bg-white p-5 rounded-lg border border-slate-200 shadow-sm hover:-translate-y-0.5 hover:border-red-300 hover:shadow-md transition duration-200 ease-in-out cursor-pointer group"
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
@@ -159,7 +179,12 @@ export const DashboardPage: React.FC = () => {
             </span>
           </div>
           <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mt-3">
-            <div className="h-full bg-red-500 rounded-full" style={{ width: `${Math.round((highCount / totalCount) * 100)}%` }} />
+            <div
+              className="h-full bg-red-500 rounded-full"
+              style={{
+                width: `${Math.round((highCount / totalCount) * 100)}%`,
+              }}
+            />
           </div>
           <p className="text-[11px] text-slate-500 mt-2 flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
@@ -168,9 +193,9 @@ export const DashboardPage: React.FC = () => {
         </div>
 
         {/* Card 2: Due This Week */}
-        <div 
-          onClick={() => setCurrentPage('risk-queue')}
-          className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-amber-300 hover:shadow-md transition-all cursor-pointer group"
+        <div
+          onClick={() => setCurrentPage("risk-queue")}
+          className="bg-white p-5 rounded-lg border border-slate-200 shadow-sm hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-md transition duration-200 ease-in-out cursor-pointer group"
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
@@ -184,10 +209,15 @@ export const DashboardPage: React.FC = () => {
             <span className="text-2xl font-extrabold text-amber-600">
               {dueWeekCount}
             </span>
-            <span className="text-xs text-amber-700 font-bold">Next 7 Days</span>
+            <span className="text-xs text-amber-700 font-bold">
+              Next 7 Days
+            </span>
           </div>
           <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mt-3">
-            <div className="h-full bg-amber-500 rounded-full" style={{ width: '45%' }} />
+            <div
+              className="h-full bg-amber-500 rounded-full"
+              style={{ width: "45%" }}
+            />
           </div>
           <p className="text-[11px] text-slate-500 mt-2 flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
@@ -196,9 +226,9 @@ export const DashboardPage: React.FC = () => {
         </div>
 
         {/* Card 3: Interventions Completed */}
-        <div 
-          onClick={() => setCurrentPage('interventions')}
-          className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-blue-300 hover:shadow-md transition-all cursor-pointer group"
+        <div
+          onClick={() => setCurrentPage("interventions")}
+          className="bg-white p-5 rounded-lg border border-slate-200 shadow-sm hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md transition duration-200 ease-in-out cursor-pointer group"
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
@@ -217,7 +247,10 @@ export const DashboardPage: React.FC = () => {
             </span>
           </div>
           <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mt-3">
-            <div className="h-full bg-blue-500 rounded-full" style={{ width: '70%' }} />
+            <div
+              className="h-full bg-blue-500 rounded-full"
+              style={{ width: "70%" }}
+            />
           </div>
           <p className="text-[11px] text-slate-500 mt-2 flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
@@ -226,9 +259,9 @@ export const DashboardPage: React.FC = () => {
         </div>
 
         {/* Card 4: Outreach Success Rate */}
-        <div 
-          onClick={() => setCurrentPage('analytics')}
-          className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-emerald-300 hover:shadow-md transition-all cursor-pointer group"
+        <div
+          onClick={() => setCurrentPage("analytics")}
+          className="bg-white p-5 rounded-lg border border-slate-200 shadow-sm hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-md transition duration-200 ease-in-out cursor-pointer group"
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
@@ -242,10 +275,15 @@ export const DashboardPage: React.FC = () => {
             <span className="text-2xl font-extrabold text-emerald-600">
               {successRate}%
             </span>
-            <span className="text-xs text-emerald-700 font-bold">Confirmed / Attended</span>
+            <span className="text-xs text-emerald-700 font-bold">
+              Confirmed / Attended
+            </span>
           </div>
           <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mt-3">
-            <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${successRate}%` }} />
+            <div
+              className="h-full bg-emerald-500 rounded-full"
+              style={{ width: `${successRate}%` }}
+            />
           </div>
           <p className="text-[11px] text-slate-500 mt-2 flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
@@ -258,7 +296,7 @@ export const DashboardPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Top Urgent High Risk Follow-ups */}
         <div className="lg:col-span-8 space-y-4">
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm flex flex-col overflow-hidden">
             <div className="p-4 border-b border-slate-100 flex items-center justify-between">
               <div>
                 <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
@@ -270,10 +308,10 @@ export const DashboardPage: React.FC = () => {
                 </p>
               </div>
               <button
-                onClick={() => setCurrentPage('risk-queue')}
-                className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] rounded font-bold uppercase tracking-wider flex items-center gap-1 transition-colors"
+                onClick={() => setCurrentPage("risk-queue")}
+                className="clinical-button px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold uppercase tracking-wider"
               >
-                View All ({summary?.highRiskCount || 186})
+                View All ({highCount})
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -293,9 +331,9 @@ export const DashboardPage: React.FC = () => {
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-medium">
                   {topHighRiskPatients.map((p, idx) => (
-                    <tr 
-                      key={p.id} 
-                      className="hover:bg-slate-50/80 bg-red-50/15 transition-colors group cursor-pointer"
+                    <tr
+                      key={p.id}
+                      className="hover:bg-slate-50 bg-red-50/15 transition-colors duration-200 group cursor-pointer"
                       onClick={() => viewPatientDetails(p.id)}
                     >
                       <td className="py-3 px-4">
@@ -317,8 +355,8 @@ export const DashboardPage: React.FC = () => {
                           </span>
                         </div>
                         <div className="w-16 h-1 rounded-full bg-slate-100 overflow-hidden mt-1">
-                          <div 
-                            className="h-full bg-red-600 rounded-full" 
+                          <div
+                            className="h-full bg-red-600 rounded-full"
                             style={{ width: `${p.currentRisk?.score || 85}%` }}
                           />
                         </div>
@@ -339,12 +377,16 @@ export const DashboardPage: React.FC = () => {
 
                       <td className="py-3 px-3">
                         <span className="text-blue-900 font-semibold text-[11px] block bg-blue-50 p-1.5 rounded border border-blue-100">
-                          {p.currentRisk?.immediateAction || 'Priority Phone Call'}
+                          {p.currentRisk?.immediateAction ||
+                            "Priority Phone Call"}
                         </span>
                       </td>
 
                       <td className="py-3 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5" onClick={e => e.stopPropagation()}>
+                        <div
+                          className="flex items-center justify-end gap-1.5"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <button
                             onClick={() => setExplainModalPatient(p)}
                             title="Why is this patient high risk?"
@@ -354,7 +396,7 @@ export const DashboardPage: React.FC = () => {
                           </button>
                           <button
                             onClick={() => setInterventionModalPatient(p)}
-                            className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold uppercase tracking-wider transition-colors shadow-xs flex items-center gap-1"
+                            className="clinical-button px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold uppercase tracking-wider shadow-xs active:scale-[0.98]"
                           >
                             Contact
                           </button>
@@ -368,20 +410,23 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           {/* Bottom Banner: Hackathon Feature Showcase */}
-          <div className="p-5 rounded-xl bg-[#1E293B] text-white flex items-center justify-between gap-4 shadow-md border border-slate-700">
+          <div className="p-5 rounded-lg bg-clinical-navy text-white flex items-center justify-between gap-4 shadow-md border border-slate-700">
             <div className="flex items-center gap-3.5">
               <div className="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-blue-400">
                 <Sparkles className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="text-sm font-bold text-slate-100">Interactive What-If Simulation Sandbox</h4>
+                <h4 className="text-sm font-bold text-slate-100">
+                  Interactive What-If Simulation Sandbox
+                </h4>
                 <p className="text-xs text-slate-300">
-                  Simulate travel vouchers or telehealth switches to evaluate prospective risk reduction before committing clinic resources.
+                  Simulate travel vouchers or telehealth switches to evaluate
+                  prospective risk reduction before committing clinic resources.
                 </p>
               </div>
             </div>
             <button
-              onClick={() => viewPatientDetails('PAT-1042')}
+              onClick={() => viewPatientDetails("PAT-1042")}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg text-xs uppercase tracking-wider transition-colors shadow-sm shrink-0"
             >
               Test Simulation
@@ -394,8 +439,12 @@ export const DashboardPage: React.FC = () => {
           {/* Population Risk Distribution Donut */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-3">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-sm font-bold text-slate-800">Risk Level Distribution</h3>
-              <span className="text-[11px] font-mono text-slate-500">1,000 Cohort</span>
+              <h3 className="text-sm font-bold text-slate-800">
+                Risk Level Distribution
+              </h3>
+              <span className="text-[11px] font-mono text-slate-500">
+                1,000 Cohort
+              </span>
             </div>
 
             <div className="h-48 w-full">
@@ -414,9 +463,14 @@ export const DashboardPage: React.FC = () => {
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip 
-                    formatter={(value: any) => [`${value} Patients`, 'Count']}
-                    contentStyle={{ backgroundColor: '#0f172a', borderRadius: '8px', color: '#fff', fontSize: '11px' }}
+                  <Tooltip
+                    formatter={(value: any) => [`${value} Patients`, "Count"]}
+                    contentStyle={{
+                      backgroundColor: "#0f172a",
+                      borderRadius: "8px",
+                      color: "#fff",
+                      fontSize: "11px",
+                    }}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -426,21 +480,30 @@ export const DashboardPage: React.FC = () => {
             <div className="space-y-2 text-xs pt-2 border-t border-slate-100">
               <div className="flex justify-between items-center">
                 <span className="flex items-center gap-2 font-medium text-slate-700">
-                  <span className="w-2.5 h-2.5 rounded-full bg-red-500"></span> High Risk (60-100)
+                  <span className="w-2.5 h-2.5 rounded-full bg-red-500"></span>{" "}
+                  High Risk (60-100)
                 </span>
-                <span className="font-bold text-slate-900 font-mono">{highCount}</span>
+                <span className="font-bold text-slate-900 font-mono">
+                  {highCount}
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="flex items-center gap-2 font-medium text-slate-700">
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Medium Risk (30-59)
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>{" "}
+                  Medium Risk (30-59)
                 </span>
-                <span className="font-bold text-slate-900 font-mono">{mediumCount}</span>
+                <span className="font-bold text-slate-900 font-mono">
+                  {mediumCount}
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="flex items-center gap-2 font-medium text-slate-700">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Low Risk (0-29)
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>{" "}
+                  Low Risk (0-29)
                 </span>
-                <span className="font-bold text-slate-900 font-mono">{lowCount}</span>
+                <span className="font-bold text-slate-900 font-mono">
+                  {lowCount}
+                </span>
               </div>
             </div>
           </div>
@@ -454,30 +517,49 @@ export const DashboardPage: React.FC = () => {
               <div className="space-y-1">
                 <div className="flex justify-between text-slate-700">
                   <span className="font-medium">Previous Missed Visits</span>
-                  <span className="font-mono font-bold text-red-600">54% of High Risk</span>
+                  <span className="font-mono font-bold text-red-600">
+                    54% of High Risk
+                  </span>
                 </div>
                 <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-red-500 rounded-full" style={{ width: '54%' }} />
+                  <div
+                    className="h-full bg-red-500 rounded-full"
+                    style={{ width: "54%" }}
+                  />
                 </div>
               </div>
 
               <div className="space-y-1">
                 <div className="flex justify-between text-slate-700">
-                  <span className="font-medium">Distance Barrier (&gt;30 km)</span>
-                  <span className="font-mono font-bold text-amber-600">32% of High Risk</span>
+                  <span className="font-medium">
+                    Distance Barrier (&gt;30 km)
+                  </span>
+                  <span className="font-mono font-bold text-amber-600">
+                    32% of High Risk
+                  </span>
                 </div>
                 <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-amber-500 rounded-full" style={{ width: '32%' }} />
+                  <div
+                    className="h-full bg-amber-500 rounded-full"
+                    style={{ width: "32%" }}
+                  />
                 </div>
               </div>
 
               <div className="space-y-1">
                 <div className="flex justify-between text-slate-700">
-                  <span className="font-medium">Sparse Frequency (&gt;60d gap)</span>
-                  <span className="font-mono font-bold text-blue-600">22% of High Risk</span>
+                  <span className="font-medium">
+                    Sparse Frequency (&gt;60d gap)
+                  </span>
+                  <span className="font-mono font-bold text-blue-600">
+                    22% of High Risk
+                  </span>
                 </div>
                 <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-blue-500 rounded-full" style={{ width: '22%' }} />
+                  <div
+                    className="h-full bg-blue-500 rounded-full"
+                    style={{ width: "22%" }}
+                  />
                 </div>
               </div>
             </div>
